@@ -5,7 +5,8 @@ UI app -> Notes.main:User_API -> Notes.storage:Storage_API
 There are several basic objects: *Note*, *Relation*, *Access*
 This API should provide enough tools for building all features, but remain small and clear - this is crucial.
 
-## Note
+## Objects
+### Note
 Every data is a *Note*, field **type** tells what.
 * string **id**
 * string **author**
@@ -17,29 +18,28 @@ Every data is a *Note*, field **type** tells what.
 * Relation[] **relations**
 In case of encryption **title**, **content**, **meta** and all **relations** are encrypted  
 
-## Relation
+### Relation
 It is a reference from one *Note* to another *Note* or presence of related Note in some way.
 * string **type** - related Note.type
 * string **id** - related Note.id
 * string **loc_title** - local synonym for related Note that can be used in this Note
 * string **loc_value** - local value for relations that carry a number, for example: weight
 
-## Access
+### Access
 * string **id** - object that has access
 * string **resourceId** - object to which access is granted
 * string **rights** - bits <create access><remove><write><read>
 
-### Explanation
+#### Explanation
 *Note* has multiple *Relations* - different kind of objects: tags, images, other notes, etc.
 *Relation* used in a *Note* may have a **loc_title**, so it would be possible to hide content behind it, for example text 'It was amazing show when _Bobby jumped from the balcony to a snow hill_ below.' could hide picture of Bobby jumping from the balcony under those words, and that _italic_ text could be a ref, while in another note we could reference to the same picture with some other text.
 *Relation* used in a *Note* may have a **loc_value**, so it would allow better search, for example for text 'Seen Lamborghini in a street, think it costs about 300 000 $' we could save relation 'price' with value '300000'.
 
-# Methods
+## Methods
 
-## Find Notes
+### Find Notes
 string[][] getNotesIds (**userId**, **ids**, **types**, **titleRegexp**, **positive_relations_filter**, **negative_relations_filter**)
 returns [[<type1>, <id1>, <id2>, ...], [<type2>, ...]]
-### params
 * string **userId**
 * string[] **ids** - [] means 'all'
 * string[] **types** - [] means 'all'
@@ -51,7 +51,7 @@ Having **userId** method will check access to *Notes* and there are two ideas of
 1. direct: if *user* has *Access* to *Note A*
 2. propagative: if *user* has access to *Note A* and it has *Access* to *Note B* then *user* has access to *Note B*
 
-## Edit Note
+### Edit Note
 string editNote (**userId**, **noteId**, **type**, **operation**, **title**, **content**, **flags**, **meta**, **add_relations**, **rm_relations**)
 TODO throws ErrCode
 * string **userId**
@@ -65,14 +65,14 @@ TODO throws ErrCode
 * string[] **add_relations** - [<type1>, <id1>, <loc_title1>, <loc_value1>, <type2>, ...] length = 4*N
 * string[] **rm_relations** - [<type1>, <id1>, <type2>, ...] length = 2*N
 
-## Get Access
+### Get Access
 int getAccess (**userId**, **noteIdA**, **noteIdB**)
 returns bits <create access><remove><write><read>
 * string **userId**
 * string **noteIdA** - note with access
 * string **noteIdB** - resource note
 
-## Edit Access
+### Edit Access
 editAccess (**userId**, **noteIdA**, **noteIdB**, **rights**)
 TODO throws ErrCode
 User gives *Note A* access to *Note B*, only if user has access 'create' to *Note B*
@@ -81,8 +81,8 @@ User gives *Note A* access to *Note B*, only if user has access 'create' to *Not
 * string **noteIdB** - resource note
 * string **rights** - bits <create access><remove><write><read>
 
-# Example scenarios
-## Adding note with inline tags and a file
+## Example scenarios
+### Adding note with inline tags and a file
 1. User
     1. writes title 'Dalmatin'
     2. writes text 'Seen a #dog in a #park today'
@@ -113,7 +113,7 @@ User gives *Note A* access to *Note B*, only if user has access 'create' to *Not
     ```
     4. creates image
     ```
-    dogImageId = editFile(
+    dogImageId = editNote(
         userId,
         null,
         'image',
@@ -142,10 +142,13 @@ User gives *Note A* access to *Note B*, only if user has access 'create' to *Not
     )
     ```
 
-## Renaming a tag
+### Renaming a tag
 When user renames tag 'dog' to 'dogs' in list of tags record [dogTagId, 'dog'] changes to [dogTagId, 'dogs']. It allows existing inline tags remain same and be used more times in a note where they are already present. In notes without tag 'dog' user now will be able to use tag 'dogs'.
 
-# Questions
+## Questions
 Author - set on create
-Access rights -
+Access rights - *Access*
 C++ compatible API -
+Full text search -
+
+# Storage API
