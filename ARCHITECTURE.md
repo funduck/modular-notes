@@ -38,21 +38,21 @@ It is a reference from one *Note* to another *Note* or presence of related Note 
 ## Methods
 
 ### Find Notes
-string[][] getNotesIds (**userId**, **ids**, **types**, **titleRegexp**, **positive_relations_filter**, **negative_relations_filter**)
+string[][] getNotesIds (**userId**, **ids**, **types**, **titleRegexp**, **relationsFilterIn**, **relationsFilterOut**)
 returns [[<type1>, <id1>, <id2>, ...], [<type2>, ...]]
 * string **userId**
 * string[] **ids** - [] means 'all'
 * string[] **types** - [] means 'all'
 * string **titleRegexp**
-* string[] **positive_relations_filter** - [] means 'all'. [<type>, <f1>, <f1_val_min>, <f1_val_max>, <f2>, ...] where 'f<N>' is id.
-* string[] **negative_relations_filter** - [] means 'none'. [<type>, <f1>, <f1_val_min>, <f1_val_max>, <f2>, ...] where 'f<N>' is id.
+* string[] **relationsFilterIn** - [] means 'all'. [<type1>, <f1_id>, <f1_val_min>, <f1_val_max>, <f2>, ..., <type2>, ...] length = 4*N
+* string[] **relationsFilterOut** - [] means 'none'. [<type1>, <f1_id>, <f1_val_min>, <f1_val_max>, <f2>, ..., <type2>, ...] length = 4*N
 ### access
 Having **userId** method will check access to *Notes* and there are two ideas of access:
 1. direct: if *user* has *Access* to *Note A*
 2. propagative: if *user* has access to *Note A* and it has *Access* to *Note B* then *user* has access to *Note B*
 
 ### Edit Note
-string editNote (**userId**, **noteId**, **type**, **operation**, **title**, **content**, **flags**, **meta**, **add_relations**, **rm_relations**)
+string editNote (**userId**, **noteId**, **type**, **operation**, **title**, **content**, **flags**, **meta**, **relationsAdd**, **relationsRm**)
 TODO throws ErrCode
 * string **userId**
 * string **noteId** - is null only if it is new Note
@@ -62,8 +62,8 @@ TODO throws ErrCode
 * binary **content**
 * int **flags**
 * string **meta**
-* string[] **add_relations** - [<type1>, <id1>, <loc_title1>, <loc_value1>, <type2>, ...] length = 4*N
-* string[] **rm_relations** - [<type1>, <id1>, <type2>, ...] length = 2*N
+* string[] **relationsAdd** - [<type1>, <id1>, <loc_title1>, <loc_value1>, <type2>, ...] length = 4*N
+* string[] **relationsRm** - [<type1>, <id1>, <type2>, ...] length = 2*N
 
 ### Get Access
 int getAccess (**userId**, **noteIdA**, **noteIdB**)
