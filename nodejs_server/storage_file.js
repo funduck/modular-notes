@@ -76,6 +76,41 @@ module.exports = function(config) {
         });
     };
 
+    storage.getAccess = function(userId, idA, idB) {
+        logger.verbose('editAccess()');
+        logger.debug('editAccess args:', userId, idA, idB, rights);
+        const d = when.defer();
+        db.find({
+            what: 'Access',
+            idA: userId,
+            idB: idB
+        }, (err, docs) => {
+            if (err) return d.reject(err);
+            if (docs.length == 0) {
+                return d.reject(new Error('user has no access to ' + idB));
+            }
+            if (!(docs[0].rights & 1)) {
+                return d.reject(new Error('user has no right to read ' + idB));
+            }
+
+            db.find({
+                what: 'Access',
+                idA: userId,
+                idB: idA
+            }, (err, docs) => {
+                if (err) return d.reject(err);
+                if (docs.length == 0) {
+                    return d.reject(new Error('user has no access to ' + idA));
+                }
+                if (!(docs[0].rights & 1)) {
+                    return d.reject(new Error('user has no right to read ' + idA));
+                }
+
+                
+            });
+        });
+    };
+
     storage.editNote = function(
         userId, id, type, operation, title, content, flags, meta, relationsAdd, relationsRm
     ) {
