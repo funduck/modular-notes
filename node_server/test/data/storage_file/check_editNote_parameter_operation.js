@@ -1,0 +1,222 @@
+module.exports = {
+    title: 'check editNote parameter "operation"',
+    steps: [{
+        title: 'insert test note',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            type: 'note',
+            operation: parseInt('111110', 2),
+            title: 'test note',
+            content: new Buffer('hello world'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'should change only title',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            type: null,
+            operation: parseInt('000010', 2),
+            title: 'changed title',
+            content: new Buffer('changed content'),
+            flags: 0,
+            meta: JSON.stringify({changed: true}),
+            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
+            relationsRm: ['image', 'someImageId'],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'check only title changed',
+        method: 'getNotes',
+        params: {
+            userId: 'Joe',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 1,
+            checkArray: {
+                0: {
+                    id: 'testNoteId',
+                    author: 'Joe',
+                    type: 'note',
+                    title: 'changed title',
+                    content: new Buffer('hello world'),
+                    flags: 2,
+                    meta: JSON.stringify({}),
+                    relations: []
+                }
+            }
+        }
+    }, {
+        title: 'should change only content',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            type: null,
+            operation: parseInt('000100', 2),
+            title: 'changed title 2',
+            content: new Buffer('changed content'),
+            flags: 0,
+            meta: JSON.stringify({changed: true}),
+            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
+            relationsRm: ['image', 'someImageId'],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'check only content changed',
+        method: 'getNotes',
+        params: {
+            userId: 'Joe',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 1,
+            checkArray: {
+                0: {
+                    id: 'testNoteId',
+                    author: 'Joe',
+                    type: 'note',
+                    title: 'changed title',
+                    content: new Buffer('changed content'),
+                    flags: 2,
+                    meta: JSON.stringify({}),
+                    relations: []
+                }
+            }
+        }
+    }, {
+        title: 'should change only flags',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            type: null,
+            operation: parseInt('001000', 2),
+            title: 'changed title 2',
+            content: new Buffer('changed content 2'),
+            flags: 0,
+            meta: JSON.stringify({changed: true}),
+            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
+            relationsRm: ['image', 'someImageId'],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'check only flags changed',
+        method: 'getNotes',
+        params: {
+            userId: 'Joe',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 1,
+            checkArray: {
+                0: {
+                    id: 'testNoteId',
+                    author: 'Joe',
+                    type: 'note',
+                    title: 'changed title',
+                    content: new Buffer('changed content'),
+                    flags: 0,
+                    meta: JSON.stringify({}),
+                    relations: []
+                }
+            }
+        }
+    }, {
+        title: 'should change only meta',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            type: null,
+            operation: parseInt('010000', 2),
+            title: 'changed title 2',
+            content: new Buffer('changed content 2'),
+            flags: 2,
+            meta: JSON.stringify({changed: true}),
+            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
+            relationsRm: ['image', 'someImageId'],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'check only meta changed',
+        method: 'getNotes',
+        params: {
+            userId: 'Joe',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 1,
+            checkArray: {
+                0: {
+                    id: 'testNoteId',
+                    author: 'Joe',
+                    type: 'note',
+                    title: 'changed title',
+                    content: new Buffer('changed content'),
+                    flags: 0,
+                    meta: JSON.stringify({changed: true}),
+                    relations: []
+                }
+            }
+        }
+    }, {
+        title: 'should change only relations',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            type: null,
+            operation: parseInt('100000', 2),
+            title: 'changed title 2',
+            content: new Buffer('changed content 2'),
+            flags: 2,
+            meta: JSON.stringify({changed2: true}),
+            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
+            relationsRm: ['image', 'someImageId'],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'check only relations changed',
+        method: 'getNotes',
+        params: {
+            userId: 'Joe',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 1,
+            checkArray: {
+                0: {
+                    id: 'testNoteId',
+                    author: 'Joe',
+                    type: 'note',
+                    title: 'changed title',
+                    content: new Buffer('changed content'),
+                    flags: 0,
+                    meta: JSON.stringify({changed: true}),
+                    relations: ['tag', 'someTagId', 'some tag', 42]
+                }
+            }
+        }
+    }]
+};

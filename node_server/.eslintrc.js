@@ -13,6 +13,7 @@ module.exports = {
             'imports': 'ignore',
             'exports': 'ignore',
             'functions': 'never'
-        }]
+        }],
+        'guard-for-in': 'off'
     }
 };
