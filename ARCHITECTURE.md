@@ -66,19 +66,19 @@ TODO throws ErrCode
 * string[] **relationsRm** - [<type1>, <id1>, <type2>, ...] length = 2*N
 
 ### Get Access
-int getAccess (**userId**, **noteIdA**, **noteIdB**)
-returns bits <create access><remove><write><read>
+int getAccess (**userId**, **idA**, **idB**)
+returns bits <create access from><create access to><remove><write><read>
 * string **userId**
-* string **noteIdA** - note with access
-* string **noteIdB** - resource note
+* string **idA** - note with access
+* string **idB** - resource note
 
 ### Edit Access
-editAccess (**userId**, **noteIdA**, **noteIdB**, **rights**)
+editAccess (**userId**, **idA**, **idB**, **rights**)
 TODO throws ErrCode
 User gives *Note A* access to *Note B*, only if user has access 'create' to *Note B*
 * string **userId**
-* string **noteIdA** - note with access
-* string **noteIdB** - resource note
+* string **idA** - note with access
+* string **idB** - resource note
 * string **rights** - bits <create access><remove><write><read>
 
 ## Example scenarios

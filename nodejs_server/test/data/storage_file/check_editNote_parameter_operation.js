@@ -218,5 +218,26 @@ module.exports = {
                 }
             }
         }
+    }, {
+        title: 'delete note',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'testNoteId',
+            operation: parseInt('000001', 2)
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'check note is deleted',
+        method: 'getNotes',
+        params: {
+            userId: 'Joe',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 0
+        }
     }]
 };

@@ -3,7 +3,7 @@
 const assert = require('assert');
 const API = require('../storage_api');
 
-require('../console_logger').setLevel('debug');
+require('../console_logger').setLevel('error');
 
 let storage;
 
@@ -40,6 +40,7 @@ describe('File based storage', function() {
             for (let j = 0; j < scenario.steps.length; j++) {
                 const step = scenario.steps[j];
                 it('step: ' + step.title, (done) => {
+                    let failed;
                     const ar = [];
                     for (let p = 0; p < API[step.method].length; p++) {
                         ar.push(step.params[API[step.method][p]]);
@@ -59,11 +60,15 @@ describe('File based storage', function() {
                         }
                     })
                     .catch((e) => {
+                        failed = true;
                         if (!step.result.error) {
                             throw e;
                         }
                     })
                     .then(() => {
+                        if (step.result.error && !failed) {
+                            throw new Error('should have failed');
+                        }
                         done();
                     })
                     .catch(done);
@@ -71,6 +76,4 @@ describe('File based storage', function() {
             }
         });
     }
-
-    // TODO Access
 });

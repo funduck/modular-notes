@@ -28,6 +28,54 @@ module.exports = function(config) {
         return d.promise;
     };
 
+    storage.editAccess = function(userId, idA, idB, rights) {
+        logger.verbose('editAccess()');
+        logger.debug('editAccess args:', userId, idA, idB, rights);
+        const d = when.defer();
+        db.find({
+            what: 'Access',
+            idA: userId,
+            idB: idB
+        }, (err, docs) => {
+            if (err) return d.reject(err);
+            if (docs.length == 0) {
+                return d.reject(new Error('user has no access to ' + idB));
+            }
+            if (!(docs[0].rights & 8)) {
+                return d.reject(new Error('user has no right to create access to ' + idB));
+            }
+
+            db.find({
+                what: 'Access',
+                idA: userId,
+                idB: idA
+            }, (err, docs) => {
+                if (err) return d.reject(err);
+                if (docs.length == 0) {
+                    return d.reject(new Error('user has no access to ' + idA));
+                }
+                if (!(docs[0].rights & 16)) {
+                    return d.reject(new Error('user has no right to create access from ' + idA));
+                }
+
+                db.update({
+                    what: 'Access',
+                    idA: idA,
+                    idB: idB
+                }, {
+                    $set: {rights: rights}
+                }, {
+                    upsert: true
+                }, (err, numAffected) => {
+                    if (err) return d.reject(err);
+                    logger.debug('editAccess result:', numAffected);
+                    if (numAffected == 0) return d.reject('note not found');
+                    d.resolve(numAffected);
+                });
+            });
+        });
+    };
+
     storage.editNote = function(
         userId, id, type, operation, title, content, flags, meta, relationsAdd, relationsRm
     ) {
@@ -36,7 +84,6 @@ module.exports = function(config) {
             'editNote() args:', userId, id, type, operation, title, content, flags, meta, relationsAdd, relationsRm
         );
 
-        // TODO use operation and calculate all fields
         // TODO access
 
         try {
@@ -107,7 +154,7 @@ module.exports = function(config) {
                     }
                 }
             }
-            if (operation & 62 == 62) {
+            if ((operation & 62) == 62) {
                 assert(type != null, '"type" cannot be null');
                 assert.equal(typeof type, 'string', 'typeof "type" must be string');
                 upsert = true;
@@ -118,11 +165,17 @@ module.exports = function(config) {
             return when.reject(e);
         }
 
+        logger.debug('set:', set);
+        logger.debug('unset:', unset);
+
+        // TODO access
+
         const d = when.defer();
-        db.update({id: id}, {$set: set, $unset: unset}, {upsert: upsert}, (err, numAffected) => {
+        db.update({what: 'Note', id: id}, {$set: set, $unset: unset}, {upsert: upsert}, (err, numAffected) => {
             logger.debug('editNote() result:', err, numAffected);
-            if (err) d.reject(err);
-            else d.resolve(numAffected);
+            if (err) return d.reject(err);
+            if (numAffected == 0) return d.reject('note not found');
+            d.resolve(numAffected);
         });
         return d.promise;
     };
@@ -135,7 +188,7 @@ module.exports = function(config) {
             'getNotesIds() args:', userId, ids, types, titleRegexp, relationsFilterIn, relationsFilterOut
         );
 
-        const filter = {};
+        const filter = {what: 'Note'};
         try {
             // TODO access
             if (ids) {
@@ -227,7 +280,7 @@ module.exports = function(config) {
 
         // TODO access
         const d = when.defer();
-        db.find({id: {$in: ids}}, {
+        db.find({what: 'Note', id: {$in: ids}}, {
             _id: 0,
             id: 1,
             author: 1,
@@ -238,7 +291,7 @@ module.exports = function(config) {
             meta: 1,
             relationsById: 1,
         }, (err, docs) => {
-            if (err) d.reject(err);
+            if (err) return d.reject(err);
             for (let i = 0; i < docs.length; i++) {
                 docs[i].relations = [];
                 docs[i].content = Buffer.from(docs[i].content.data);
