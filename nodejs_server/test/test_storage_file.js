@@ -30,7 +30,7 @@ describe('File based storage', function() {
     for (let i = 0; i < scenarios.length; i++) {
         const scenario = scenarios[i];
         describe('scenario: ' + scenario.title, function() {
-            it('step: clear storage', (done) => {
+            before((done) => {
                 storage.clear()
                 .then(() => {
                     done();

@@ -21,9 +21,10 @@ module.exports = (config) => {
 
     storage.clear = () => {
         const d = when.defer();
-        db.remove({}, (err, numRemoved) => {
-            if (err) d.reject(err);
-            else d.resolve(numRemoved);
+        db.remove({}, {multi: true}, (err, numRemoved) => {
+            if (err) return d.reject(err);
+            // logger.debug('clear() removed:', numRemoved);
+            d.resolve(numRemoved);
         });
         return d.promise;
     };
@@ -34,7 +35,15 @@ module.exports = (config) => {
             id: {$in: ids}
         }, (err, docs) => {
             if (err) return d.reject(err);
-            d.resolve(docs);
+            const order = new Map();
+            const res = new Array(ids.length);
+            for (let i = 0; i < ids.length; i++) {
+                order.set(ids[i], i);
+            }
+            for (let i = 0; i < docs.length; i++) {
+                res[order.get(docs[i].id)] = docs[i];
+            }
+            d.resolve(res);
         });
         return d.promise;
     };
@@ -73,8 +82,8 @@ module.exports = (config) => {
         }
         return getNotes([idA, idB])
         .then((notes) => {
-            const noteA = notes[0].id == idA ? notes[0] : notes[1];
-            const noteB = notes[0].id == idA ? notes[1] : notes[0];
+            const noteA = notes[0];
+            const noteB = notes[1];
             return calcAccesRights(idA, noteA, noteB);
         });
     };
@@ -207,15 +216,13 @@ module.exports = (config) => {
                 if (operationIs.relations(operation)) {
                     assert(relationsAdd != null || relationsRm != null, '"relations" cannot be null');
                     if (relationsAdd && relationsAdd.length > 0) {
-                        for (let i = 0; i < relationsAdd.length / 4; i++) {
-                            const rType = relationsAdd[4*i];
-                            const rId = relationsAdd[4*i + 1];
-                            const rTitle = relationsAdd[4*i + 2];
-                            const rValue = relationsAdd[4*i + 3];
+                        for (let i = 0; i < relationsAdd.length / 3; i++) {
+                            const rId = relationsAdd[3*i + 0];
+                            const rTitle = relationsAdd[3*i + 1];
+                            const rValue = relationsAdd[3*i + 2];
                             assert(rId != id, '"relations" cant have the note itself');
-                            set['relationsByType.' + rType +'.' + rId] = true;
+                            assert(rId != null, '"relations" must have ids');
                             set['relationsById.' + rId] = {
-                                type: rType,
                                 loc_title: rTitle,
                                 loc_value: rValue
                             };
@@ -223,12 +230,12 @@ module.exports = (config) => {
                         }
                     }
                     if (relationsRm && relationsRm.length > 0) {
-                        for (let i = 0; i < relationsRm.length / 2; i++) {
-                            const rType = relationsRm[2*i];
-                            const rId = relationsRm[2*i + 1];
+                        for (let i = 0; i < relationsRm.length; i++) {
+                            const rId = relationsRm[i];
                             assert(rId != id, '"relations" cant have the note itself');
-                            unset['relationsByType.' + rType +'.' + rId] = true;
+                            assert(rId != null, '"relations" must have ids');
                             unset['relationsById.' + rId] = true;
+                            relIds.push(rId);
                         }
                     }
                 }
@@ -253,8 +260,16 @@ module.exports = (config) => {
                         const userNote = notes.pop();
                         for (let i = 0; i < notes.length; i++) {
                             const note = notes[i];
+                            assert(note != null, 'relation ' + relIds[i] + ' not found');
                             if (!hasUserRightOnNote(userId, userNote, note, 'relate')) {
                                 throw new Error('user ' + userId + ' cant relate to ' + note.id);
+                            }
+                            // setting "type" for easier search
+                            if (relationsAdd && i < relationsAdd.length / 3) {
+                                set['relationsByType.' + note.type +'.' + note.id] = true;
+                                set['relationsById.' + note.id].type = note.type;
+                            } else {
+                                unset['relationsByType.' + note.type +'.' + note.id] = true;
                             }
                         }
                     });
@@ -303,17 +318,20 @@ module.exports = (config) => {
                 filter['relationsByType.' + rType] = {$exists: true, $ne: {}};
             }
             if (rId) {
-                if (!rValMin && !rValMax) {
+                if (rValMin == null && rValMax == null) {
                     filter['relationsById.' + rId] = {$exists: true};
                 }
-                if (rValMin) {
-                    filter['relationsById.' + rId +'.loc_value'] = {$gte: parseFloat(rValMin, 10)};
+                if (rValMin != null) {
+                    filter['relationsById.' + rId +'.loc_value'] = filter['relationsById.' + rId +'.loc_value'] || {};
+                    filter['relationsById.' + rId +'.loc_value'].$gte = parseFloat(rValMin, 10);
                 }
-                if (rValMax) {
-                    filter['relationsById.' + rId +'.loc_value'] = {$lte: parseFloat(rValMax, 10)};
+                if (rValMax != null) {
+                    filter['relationsById.' + rId +'.loc_value'] = filter['relationsById.' + rId +'.loc_value'] || {};
+                    filter['relationsById.' + rId +'.loc_value'].$lte = parseFloat(rValMax, 10);
                 }
             }
         }
+        if (Object.keys(filter).length == 0) return null;
         return filter;
     };
 
@@ -337,13 +355,19 @@ module.exports = (config) => {
                     filter.type = {$in: types};
                 }
                 if (titleRegexp) {
-                    filter.title = {$regex: new RegExp(titleRegexp)};
+                    filter.title = {$regex: RegExp(titleRegexp)};
                 }
                 if (relationsFilterIn) {
-                    Object.assign(filter, makeRelationsFilter(relationsFilterIn));
+                    const addFilter = makeRelationsFilter(relationsFilterIn);
+                    if (addFilter) {
+                        Object.assign(filter, addFilter);
+                    }
                 }
                 if (relationsFilterOut) {
-                    Object.assign(filter, {$not: makeRelationsFilter(relationsFilterIn)});
+                    const addFilter = makeRelationsFilter(relationsFilterOut);
+                    if (addFilter) {
+                        Object.assign(filter, {$not: addFilter});
+                    }
                 }
             } catch (e) {
                 return when.reject(e);
@@ -351,7 +375,6 @@ module.exports = (config) => {
             const d = when.defer();
             logger.debug('db.find()', JSON.stringify(filter, null, '  '));
             db.find(filter, {id: 1, accessRightsById: 1}, (err, docs) => {
-                logger.debug('getNotesIds() result:', err, docs);
                 if (err) return d.reject(err);
                 const res = [];
                 for (let i = 0; i < docs.length; i++) {
@@ -359,6 +382,7 @@ module.exports = (config) => {
                     if (!hasUserRightOnNote(userId, userNote, note, 'read')) continue;
                     res.push(note.id);
                 }
+                logger.debug('getNotesIds() result:', err, res);
                 d.resolve(res);
             });
             return d.promise;

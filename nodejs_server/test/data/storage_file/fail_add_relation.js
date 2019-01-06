@@ -79,19 +79,19 @@ module.exports = {
             id: 'testNoteId',
             userId: 'Joe',
             operation: parseInt('100000', 2),
-            relationsAdd: ['note', 'privateNoteId', 'Bill\'s note', null],
+            relationsAdd: ['privateNoteId', 'Bill\'s note', null],
         },
         result: {
             error: true
         }
     }, {
-        title: 'fail add relation by Bill to same note',
+        title: 'fail add relation by Joe to same note',
         method: 'editNote',
         params: {
             id: 'privateNoteId',
             userId: 'Joe',
             operation: parseInt('100000', 2),
-            relationsAdd: ['note', 'privateNoteId', 'recursion', null],
+            relationsAdd: ['privateNoteId', 'recursion', null],
         },
         result: {
             error: true

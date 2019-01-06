@@ -19,21 +19,25 @@ Every data is a *Note*, field **type** tells what.
 In case of encryption **title**, **content**, **meta** and all **relations** are encrypted  
 
 ### Relation
+*Relation* is contained in a *Note*.
+*Note* has multiple *Relations* - different kind of objects: tags, images, other notes, etc.
 It is a reference from one *Note* to another *Note* or presence of related Note in some way.
+*Relation* used in a *Note* may have a **loc_title**, so it would be possible to hide content behind it, for example text 'It was amazing show when _Bobby jumped from the balcony to a snow hill_ below.' could hide picture of Bobby jumping from the balcony under those words, and that _italic_ text could be a ref, while in another note we could reference to the same picture with some other text.
+*Relation* used in a *Note* may have a **loc_value**, so it would allow better search, for example for text 'Seen Lamborghini in a street, think it costs about 300 000 $' we could save relation 'price' with value '300000'.
+To build a *Relation* access to both *Notes* is required.
+*Note* cannot relate to itself.
 * string **type** - related Note.type
 * string **id** - related Note.id
 * string **loc_title** - local synonym for related Note that can be used in this Note
 * string **loc_value** - local value for relations that carry a number, for example: weight
 
 ### Access
+*Access* is contained in a *Note* for all *Notes* that have access to it.
 * string **id** - object that has access
-* string **resourceId** - object to which access is granted
 * string **rights** - bits <create access from><create access to><delete><write><relate><read>
-
-#### Explanation
-*Note* has multiple *Relations* - different kind of objects: tags, images, other notes, etc.
-*Relation* used in a *Note* may have a **loc_title**, so it would be possible to hide content behind it, for example text 'It was amazing show when _Bobby jumped from the balcony to a snow hill_ below.' could hide picture of Bobby jumping from the balcony under those words, and that _italic_ text could be a ref, while in another note we could reference to the same picture with some other text.
-*Relation* used in a *Note* may have a **loc_value**, so it would allow better search, for example for text 'Seen Lamborghini in a street, think it costs about 300 000 $' we could save relation 'price' with value '300000'.
+*Note_A* has access to *Note_B* if there is *Access* in *Note_B* for *Note_A*.
+Also *Note_A* has access to *Note_C* if *Note_A* relates to *Note_B* and *Note_B* has access to *Note_C*. Only one transition of access is supported for simplicity. And direct *Access* covers all indirect accesses, but if there is no direct access, then all accesses are summarized.  
+For example: these *Notes* could be 'user', 'chat room' and 'chat messages', 'user' is in 'chat room' can be represented as 'user' has a *Relation* to 'chat room', and 'chat room' has access to all messages in it, so user has access to messages in chat. One may continue building roles for access: user relates to role and role provides access of special kind to resources.
 
 ## Methods
 
@@ -54,8 +58,8 @@ Having **userId** method will check access to *Notes* and there are two ideas of
 ### Edit Note
 string editNote (**userId**, **noteId**, **type**, **operation**, **title**, **content**, **flags**, **meta**, **relationsAdd**, **relationsRm**)
 TODO throws ErrCode
-creates full access to new Note
-adds relations only if user has access 'relate' to them
+Creates full access to new Note
+User needs access 'relate' to modifying relations
 TODO should it add user to relations?
 * string **userId**
 * string **noteId** - is null only if it is new Note
@@ -65,8 +69,8 @@ TODO should it add user to relations?
 * binary **content**
 * int **flags**
 * string **meta**
-* string[] **relationsAdd** - [<type1>, <id1>, <loc_title1>, <loc_value1>, <type2>, ...] length = 4*N
-* string[] **relationsRm** - [<type1>, <id1>, <type2>, ...] length = 2*N
+* string[] **relationsAdd** - [<id1>, <loc_title1>, <loc_value1>, <id2>, ...] length = 3*N
+* string[] **relationsRm** - [<id1>, <id2>, ...]
 
 ### Get Access
 int getAccess (**userId**, **idA**, **idB**)

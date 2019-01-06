@@ -1,5 +1,5 @@
 module.exports = {
-    title: 'create tag and note with it',
+    title: 'create note with relation',
     steps: [{
         title: 'create user`',
         method: 'editNote',
@@ -19,14 +19,14 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'create tag',
+        title: 'create relation first',
         method: 'editNote',
         params: {
             id: 'firstTagId',
             userId: 'Joe',
-            type: 'tag',
+            type: 'tag prototype',
             operation: parseInt('111110', 2),
-            title: 'first tag',
+            title: 'tag title',
             content: new Buffer('First tag!'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -37,7 +37,7 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'get tag',
+        title: 'get relation',
         method: 'getNotes',
         params: {
             userId: 'Joe',
@@ -49,8 +49,8 @@ module.exports = {
                 0: {
                     id: 'firstTagId',
                     author: 'Joe',
-                    type: 'tag',
-                    title: 'first tag',
+                    type: 'tag prototype',
+                    title: 'tag title',
                     content: new Buffer('First tag!'),
                     flags: 2,
                     meta: JSON.stringify({}),
@@ -59,18 +59,18 @@ module.exports = {
             }
         }
     }, {
-        title: 'create note with tag',
+        title: 'create note with relation',
         method: 'editNote',
         params: {
-            id: 'noteWithTagId',
+            id: 'noteWithRel',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'note with tag',
-            content: new Buffer('ok, lets try using our #"first tag"'),
+            title: 'note with relation',
+            content: new Buffer('ok'),
             flags: 2,
             meta: JSON.stringify({}),
-            relationsAdd: ['tag', 'firstTagId', 'first tag', null],
+            relationsAdd: ['firstTagId', 'tag prototype text', null],
             relationsRm: [],
         },
         result: {
@@ -81,20 +81,20 @@ module.exports = {
         method: 'getNotes',
         params: {
             userId: 'Joe',
-            ids: ['noteWithTagId']
+            ids: ['noteWithRel']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'noteWithTagId',
+                    id: 'noteWithRel',
                     author: 'Joe',
                     type: 'note',
-                    title: 'note with tag',
-                    content: new Buffer('ok, lets try using our #"first tag"'),
+                    title: 'note with relation',
+                    content: new Buffer('ok'),
                     flags: 2,
                     meta: JSON.stringify({}),
-                    relations: ['tag', 'firstTagId', 'first tag', null]
+                    relations: ['tag prototype', 'firstTagId', 'tag prototype text', null]
                 }
             }
         }
@@ -102,7 +102,7 @@ module.exports = {
         title: 'remove tag',
         method: 'editNote',
         params: {
-            id: 'noteWithTagId',
+            id: 'noteWithRel',
             userId: 'Joe',
             type: null,
             operation: parseInt('100000', 2),
@@ -111,7 +111,7 @@ module.exports = {
             flags: null,
             meta: null,
             relationsAdd: [],
-            relationsRm: ['tag', 'firstTagId'],
+            relationsRm: ['firstTagId'],
         },
         result: {
             error: false,
@@ -121,17 +121,17 @@ module.exports = {
         method: 'getNotes',
         params: {
             userId: 'Joe',
-            ids: ['noteWithTagId']
+            ids: ['noteWithRel']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'noteWithTagId',
+                    id: 'noteWithRel',
                     author: 'Joe',
                     type: 'note',
-                    title: 'note with tag',
-                    content: new Buffer('ok, lets try using our #"first tag"'),
+                    title: 'note with relation',
+                    content: new Buffer('ok'),
                     flags: 2,
                     meta: JSON.stringify({}),
                     relations: []
@@ -142,10 +142,10 @@ module.exports = {
         title: 'add tag back',
         method: 'editNote',
         params: {
-            id: 'noteWithTagId',
+            id: 'noteWithRel',
             userId: 'Joe',
             operation: parseInt('100000', 2),
-            relationsAdd: ['tag', 'firstTagId', 'first tag back', null],
+            relationsAdd: ['firstTagId', 'first tag back', null],
         },
         result: {
             error: false,
@@ -155,20 +155,20 @@ module.exports = {
         method: 'getNotes',
         params: {
             userId: 'Joe',
-            ids: ['noteWithTagId']
+            ids: ['noteWithRel']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'noteWithTagId',
+                    id: 'noteWithRel',
                     author: 'Joe',
                     type: 'note',
-                    title: 'note with tag',
-                    content: new Buffer('ok, lets try using our #"first tag"'),
+                    title: 'note with relation',
+                    content: new Buffer('ok'),
                     flags: 2,
                     meta: JSON.stringify({}),
-                    relations: ['tag', 'firstTagId', 'first tag back', null]
+                    relations: ['tag prototype', 'firstTagId', 'first tag back', null]
                 }
             }
         }

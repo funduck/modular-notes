@@ -19,7 +19,7 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert test note',
+        title: 'insert note',
         method: 'editNote',
         params: {
             userId: 'Joe',
@@ -28,6 +28,42 @@ module.exports = {
             operation: parseInt('111110', 2),
             title: 'test note',
             content: new Buffer('hello world'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'insert tag note',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'someTagId',
+            type: 'note',
+            operation: parseInt('111110', 2),
+            title: 'some tag',
+            content: new Buffer(''),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'insert image note',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'someImageId',
+            type: 'note',
+            operation: parseInt('111110', 2),
+            title: 'some image',
+            content: new Buffer(''),
             flags: 2,
             meta: JSON.stringify({}),
             relationsAdd: [],
@@ -48,8 +84,8 @@ module.exports = {
             content: new Buffer('changed content'),
             flags: 0,
             meta: JSON.stringify({changed: true}),
-            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
-            relationsRm: ['image', 'someImageId'],
+            relationsAdd: ['someTagId', 'some tag', 42],
+            relationsRm: ['someImageId'],
         },
         result: {
             error: false
@@ -88,8 +124,8 @@ module.exports = {
             content: new Buffer('changed content'),
             flags: 0,
             meta: JSON.stringify({changed: true}),
-            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
-            relationsRm: ['image', 'someImageId'],
+            relationsAdd: ['someTagId', 'some tag', 42],
+            relationsRm: ['someImageId'],
         },
         result: {
             error: false
@@ -128,8 +164,8 @@ module.exports = {
             content: new Buffer('changed content 2'),
             flags: 0,
             meta: JSON.stringify({changed: true}),
-            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
-            relationsRm: ['image', 'someImageId'],
+            relationsAdd: ['someTagId', 'some tag', 42],
+            relationsRm: ['someImageId'],
         },
         result: {
             error: false
@@ -168,8 +204,8 @@ module.exports = {
             content: new Buffer('changed content 2'),
             flags: 2,
             meta: JSON.stringify({changed: true}),
-            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
-            relationsRm: ['image', 'someImageId'],
+            relationsAdd: ['someTagId', 'some tag', 42],
+            relationsRm: ['someImageId'],
         },
         result: {
             error: false
@@ -208,8 +244,8 @@ module.exports = {
             content: new Buffer('changed content 2'),
             flags: 2,
             meta: JSON.stringify({changed2: true}),
-            relationsAdd: ['tag', 'someTagId', 'some tag', 42],
-            relationsRm: ['image', 'someImageId'],
+            relationsAdd: ['someTagId', 'some tag', 42],
+            relationsRm: ['someImageId'],
         },
         result: {
             error: false
@@ -232,7 +268,7 @@ module.exports = {
                     content: new Buffer('changed content'),
                     flags: 0,
                     meta: JSON.stringify({changed: true}),
-                    relations: ['tag', 'someTagId', 'some tag', 42]
+                    relations: ['note', 'someTagId', 'some tag', 42]
                 }
             }
         }
