@@ -1,6 +1,42 @@
 module.exports = {
-    title: 'fail editNote witout access',
+    title: 'fail editNote and getNotes witout access',
     steps: [{
+        title: 'create user Joe',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'Joe',
+            type: 'user',
+            operation: parseInt('111110', 2),
+            title: 'Joe',
+            content: new Buffer('Joe Andrew Smith'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
+        title: 'create user Bill',
+        method: 'editNote',
+        params: {
+            userId: 'Bill',
+            id: 'Bill',
+            type: 'user',
+            operation: parseInt('111110', 2),
+            title: 'Bill',
+            content: new Buffer('Bill Delatour Doutriugh'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
         title: 'insert test note by Joe',
         method: 'editNote',
         params: {
@@ -31,7 +67,7 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'get note',
+        title: 'get note by Joe',
         method: 'getNotes',
         params: {
             userId: 'Joe',
@@ -50,6 +86,16 @@ module.exports = {
                     meta: JSON.stringify({})
                 }
             }
+        }
+    }, {
+        title: 'fail get note by Bill',
+        method: 'getNotes',
+        params: {
+            userId: 'Bill',
+            ids: ['testNoteId']
+        },
+        result: {
+            length: 0
         }
     }]
 };

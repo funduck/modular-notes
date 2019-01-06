@@ -1,6 +1,24 @@
 module.exports = {
     title: 'check editNote parameter "operation"',
     steps: [{
+        title: 'create user`',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'Joe',
+            type: 'user',
+            operation: parseInt('111110', 2),
+            title: 'Joe',
+            content: new Buffer('Joe Andrew Smith'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
         title: 'insert test note',
         method: 'editNote',
         params: {

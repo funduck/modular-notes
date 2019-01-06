@@ -1,6 +1,24 @@
 module.exports = {
     title: 'create tag and note with it',
     steps: [{
+        title: 'create user`',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'Joe',
+            type: 'user',
+            operation: parseInt('111110', 2),
+            title: 'Joe',
+            content: new Buffer('Joe Andrew Smith'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
         title: 'create tag',
         method: 'editNote',
         params: {

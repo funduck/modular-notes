@@ -3,7 +3,7 @@
 const assert = require('assert');
 const API = require('../storage_api');
 
-require('../console_logger').setLevel('error');
+require('../console_logger').setLevel('debug');
 
 let storage;
 

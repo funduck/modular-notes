@@ -38,7 +38,7 @@ module.exports = {
     int rights
     */
     editAccess: [
-        userId, idA, idB, rights
+        'userId', 'idA', 'idB', 'rights'
     ],
 
     /*
@@ -46,5 +46,5 @@ module.exports = {
     string idA,
     string idB
     */
-    getAccess: [userId, idA, idB]
+    getAccess: ['userId', 'idA', 'idB']
 };

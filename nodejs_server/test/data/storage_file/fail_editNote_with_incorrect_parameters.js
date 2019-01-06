@@ -1,6 +1,24 @@
 module.exports = {
     title: 'fail editNote with incorrect parameters',
     steps: [{
+        title: 'create user`',
+        method: 'editNote',
+        params: {
+            userId: 'Joe',
+            id: 'Joe',
+            type: 'user',
+            operation: parseInt('111110', 2),
+            title: 'Joe',
+            content: new Buffer('Joe Andrew Smith'),
+            flags: 2,
+            meta: JSON.stringify({}),
+            relationsAdd: [],
+            relationsRm: [],
+        },
+        result: {
+            error: false
+        }
+    }, {
         title: 'note without id',
         method: 'editNote',
         params: {
