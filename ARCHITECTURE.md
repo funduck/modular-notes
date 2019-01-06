@@ -28,7 +28,7 @@ It is a reference from one *Note* to another *Note* or presence of related Note 
 ### Access
 * string **id** - object that has access
 * string **resourceId** - object to which access is granted
-* string **rights** - bits <create access from><create access to><delete><write><read>
+* string **rights** - bits <create access from><create access to><delete><write><relate><read>
 
 #### Explanation
 *Note* has multiple *Relations* - different kind of objects: tags, images, other notes, etc.
@@ -55,6 +55,8 @@ Having **userId** method will check access to *Notes* and there are two ideas of
 string editNote (**userId**, **noteId**, **type**, **operation**, **title**, **content**, **flags**, **meta**, **relationsAdd**, **relationsRm**)
 TODO throws ErrCode
 creates full access to new Note
+adds relations only if user has access 'relate' to them
+TODO should it add user to relations?
 * string **userId**
 * string **noteId** - is null only if it is new Note
 * string **type**
@@ -80,7 +82,7 @@ User gives *Note A* access to *Note B*, only if user has access 'create access t
 * string **userId**
 * string **idA** - note with access
 * string **idB** - resource note
-* string **rights** - bits <create access from><create access to><delete><write><read>
+* string **rights** - bits <create access from><create access to><delete><write><relate><read>
 
 ## Example scenarios
 ### Adding note with inline tags and a file
