@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const API = require('../storage_api');
+const storageAPI = require('../storage_api');
 
 require('../console_logger').setLevel('error');
 
@@ -42,8 +42,8 @@ describe('File based storage', function() {
                 it('step: ' + step.title, (done) => {
                     let failed;
                     const ar = [];
-                    for (let p = 0; p < API[step.method].length; p++) {
-                        ar.push(step.params[API[step.method][p]]);
+                    for (let p = 0; p < storageAPI[step.method].length; p++) {
+                        ar.push(step.params[storageAPI[step.method][p]]);
                     }
 
                     storage[step.method](...ar)

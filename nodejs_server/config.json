@@ -1,7 +1,7 @@
 {
-    "storage": {
-        "file": {
-            "filename": "database.json"
-        }
-    }
+    "log_level": "verbose",
+    "storage_file": {
+        "filename": "database.json"
+    },
+    "server_port": 9001
 }

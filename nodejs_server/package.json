@@ -2,13 +2,14 @@
   "name": "node_server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/test* --exit"
   },
-  "author": "",
+  "author": "oomilekh",
   "license": "ISC",
   "dependencies": {
+    "jayson": "^2.1.1",
     "mocha": "^5.2.0",
     "nedb": "^1.8.0",
     "when": "^3.7.8"

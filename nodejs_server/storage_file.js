@@ -3,7 +3,7 @@
 const assert = require('assert');
 const when = require('when');
 const NeDB = require('nedb');
-const API = require('./storage_api');
+const storageAPI = require('./storage_api');
 
 module.exports = (config) => {
     const db = config
@@ -17,7 +17,7 @@ module.exports = (config) => {
 
     const logger = config && config.logger ? config.logger : require('./console_logger');
 
-    const storage = Object.assign({}, API);
+    const storage = Object.assign({}, storageAPI);
 
     storage.clear = () => {
         const d = when.defer();
@@ -200,8 +200,10 @@ module.exports = (config) => {
                 }
                 if (operationIs.content(operation)) {
                     assert(content != null, '"content" cannot be null');
-                    assert(content instanceof Buffer, '"content" must be Buffer');
-                    set.content = content.toJSON();
+                    if (content instanceof Buffer) {
+                        content = content.toJSON();
+                    }
+                    set.content = content;
                 }
                 if (operationIs.flags(operation)) {
                     assert(flags != null, '"flags" cannot be null');
@@ -417,7 +419,11 @@ module.exports = (config) => {
                     const note = docs[i];
                     if (!hasUserRightOnNote(userId, userNote, note, 'read')) continue;
                     note.relations = [];
-                    note.content = Buffer.from(note.content.data);
+                    note.content = (typeof note.content == 'object' && note.content.type == 'Buffer')
+                        ?
+                        Buffer.from(note.content.data)
+                        :
+                        note.content;
                     for (const rId in note.relationsById) {
                         note.relations.push(note.relationsById[rId].type);
                         note.relations.push(rId);

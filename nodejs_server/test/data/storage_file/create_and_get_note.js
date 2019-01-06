@@ -9,7 +9,7 @@ module.exports = {
             type: 'user',
             operation: parseInt('111110', 2),
             title: 'Joe',
-            content: new Buffer('Joe Andrew Smith'),
+            content: 'Joe Andrew Smith',
             flags: 2,
             meta: JSON.stringify({}),
             relationsAdd: [],
