@@ -1,8 +1,8 @@
 module.exports = {
-    title: 'fail editNote with incorrect parameters',
+    title: 'fail editNode with incorrect parameters',
     steps: [{
         title: 'create user`',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -19,14 +19,14 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'note without id',
-        method: 'editNote',
+        title: 'node without id',
+        method: 'editNode',
         params: {
             id: null,
             userId: 'Joe',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'note without id',
+            title: 'node without id',
             content: new Buffer('no id'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -37,14 +37,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without userId',
-        method: 'editNote',
+        title: 'node without userId',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: null,
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'note without userId',
+            title: 'node without userId',
             content: new Buffer('no userId'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -55,14 +55,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without operation',
-        method: 'editNote',
+        title: 'node without operation',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: 'note',
             operation: null,
-            title: 'note without operation',
+            title: 'node without operation',
             content: new Buffer('no operation'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -73,14 +73,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without type',
-        method: 'editNote',
+        title: 'node without type',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: null,
             operation: parseInt('111110', 2),
-            title: 'note without type',
+            title: 'node without type',
             content: new Buffer('no type'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -91,10 +91,10 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without title',
-        method: 'editNote',
+        title: 'node without title',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('000010', 2),
@@ -109,14 +109,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without content',
-        method: 'editNote',
+        title: 'node without content',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('000100', 2),
-            title: 'note without content',
+            title: 'node without content',
             content: null,
             flags: 2,
             meta: JSON.stringify({}),
@@ -127,14 +127,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without flags',
-        method: 'editNote',
+        title: 'node without flags',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('001000', 2),
-            title: 'note without content',
+            title: 'node without content',
             content: new Buffer('no flags'),
             flags: null,
             meta: JSON.stringify({}),
@@ -145,14 +145,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without meta',
-        method: 'editNote',
+        title: 'node without meta',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('010000', 2),
-            title: 'note without meta',
+            title: 'node without meta',
             content: new Buffer('no meta'),
             flags: 2,
             meta: null,
@@ -163,14 +163,14 @@ module.exports = {
             error: true
         }
     }, {
-        title: 'note without meta',
-        method: 'editNote',
+        title: 'node without meta',
+        method: 'editNode',
         params: {
-            id: 'someNoteId',
+            id: 'someNodeId',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('100000', 2),
-            title: 'note without relations',
+            title: 'node without relations',
             content: new Buffer('no relations'),
             flags: 2,
             meta: JSON.stringify({}),

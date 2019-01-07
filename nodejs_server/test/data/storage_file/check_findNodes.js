@@ -1,8 +1,8 @@
 module.exports = {
-    title: 'check getNotesIds',
+    title: 'check findNodes',
     steps: [{
         title: 'create user Joe',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -20,7 +20,7 @@ module.exports = {
         }
     }, {
         title: 'check db is clear',
-        method: 'getNotesIds',
+        method: 'findNodes',
         params: {
             userId: 'Joe'
         },
@@ -32,7 +32,7 @@ module.exports = {
         }
     }, {
         title: 'create user Bill',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Bill',
             id: 'Bill',
@@ -49,15 +49,15 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'create note by Joe',
-        method: 'editNote',
+        title: 'create node by Joe',
+        method: 'editNode',
         params: {
-            id: 'joesNote1',
+            id: 'joesNode1',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'note 1',
-            content: new Buffer('note 1'),
+            title: 'node 1',
+            content: new Buffer('node 1'),
             flags: 2,
             meta: JSON.stringify({}),
             relationsAdd: [],
@@ -67,8 +67,8 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'not get note\'s id by Bill',
-        method: 'getNotesIds',
+        title: 'not get node\'s id by Bill',
+        method: 'findNodes',
         params: {
             userId: 'Bill',
             types: ['note']
@@ -77,8 +77,8 @@ module.exports = {
             length: 0
         }
     }, {
-        title: 'get note\'s id by Joe',
-        method: 'getNotesIds',
+        title: 'get node\'s id by Joe',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note']
@@ -86,12 +86,12 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote1'
+                0: 'joesNode1'
             }
         }
     }, {
         title: 'create tag T1',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             id: 'T1',
             userId: 'Joe',
@@ -109,7 +109,7 @@ module.exports = {
         }
     }, {
         title: 'create tag T2',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             id: 'T2',
             userId: 'Joe',
@@ -127,9 +127,9 @@ module.exports = {
         }
     }, {
         title: 'add tag T1',
-        method: 'editNote',
+        method: 'editNode',
         params: {
-            id: 'joesNote1',
+            id: 'joesNode1',
             userId: 'Joe',
             operation: parseInt('100000', 2),
             relationsAdd: ['T1', 'first tag', null],
@@ -138,15 +138,15 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'create another note by Joe',
-        method: 'editNote',
+        title: 'create another node by Joe',
+        method: 'editNode',
         params: {
-            id: 'joesNote2',
+            id: 'joesNode2',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'note 2',
-            content: new Buffer('note 2'),
+            title: 'node 2',
+            content: new Buffer('node 2'),
             flags: 2,
             meta: JSON.stringify({}),
             relationsAdd: [],
@@ -156,8 +156,8 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'get 2 note\'s id by "types"',
-        method: 'getNotesIds',
+        title: 'get 2 node\'s id by "types"',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note']
@@ -166,8 +166,8 @@ module.exports = {
             length: 2
         }
     }, {
-        title: 'get 1 note\'s id by type and "titleRegexp"',
-        method: 'getNotesIds',
+        title: 'get 1 node\'s id by type and "titleRegexp"',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -176,12 +176,12 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote1'
+                0: 'joesNode1'
             }
         }
     }, {
-        title: 'get 1 note\'s id by type and relation type',
-        method: 'getNotesIds',
+        title: 'get 1 node\'s id by type and relation type',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -190,12 +190,12 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote1'
+                0: 'joesNode1'
             }
         }
     }, {
-        title: 'get 1 note\'s id by type and exclude relation type',
-        method: 'getNotesIds',
+        title: 'get 1 node\'s id by type and exclude relation type',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -204,12 +204,12 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote2'
+                0: 'joesNode2'
             }
         }
     }, {
-        title: 'get 2 note\'s id by type and empty relation',
-        method: 'getNotesIds',
+        title: 'get 2 node\'s id by type and empty relation',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -219,8 +219,8 @@ module.exports = {
             length: 2
         }
     }, {
-        title: 'get 2 note\'s id by type and exclude empty relation',
-        method: 'getNotesIds',
+        title: 'get 2 node\'s id by type and exclude empty relation',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -230,8 +230,8 @@ module.exports = {
             length: 2
         }
     }, {
-        title: 'get 1 note\'s id by type and relation id T1',
-        method: 'getNotesIds',
+        title: 'get 1 node\'s id by type and relation id T1',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -240,12 +240,12 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote1'
+                0: 'joesNode1'
             }
         }
     }, {
-        title: 'get 1 note\'s id by type and exclude relation id T1',
-        method: 'getNotesIds',
+        title: 'get 1 node\'s id by type and exclude relation id T1',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -254,14 +254,14 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote2'
+                0: 'joesNode2'
             }
         }
     }, {
-        title: 'add tag T2 to note1',
-        method: 'editNote',
+        title: 'add tag T2 to node1',
+        method: 'editNode',
         params: {
-            id: 'joesNote1',
+            id: 'joesNode1',
             userId: 'Joe',
             operation: parseInt('100000', 2),
             relationsAdd: ['T2', 'math constant', 3.14],
@@ -270,10 +270,10 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'add tag T2 to note2',
-        method: 'editNote',
+        title: 'add tag T2 to node2',
+        method: 'editNode',
         params: {
-            id: 'joesNote2',
+            id: 'joesNode2',
             userId: 'Joe',
             operation: parseInt('100000', 2),
             relationsAdd: ['T2', 'math constant', 2.71],
@@ -282,8 +282,8 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'get 2 note\'s id by type and relation id T2',
-        method: 'getNotesIds',
+        title: 'get 2 node\'s id by type and relation id T2',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -293,8 +293,8 @@ module.exports = {
             length: 2
         }
     }, {
-        title: 'get 2 note\'s id by type, relation id T2 and value > 0',
-        method: 'getNotesIds',
+        title: 'get 2 node\'s id by type, relation id T2 and value > 0',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -304,8 +304,8 @@ module.exports = {
             length: 2
         }
     }, {
-        title: 'get 0 note\'s id by type, relation id T2 and value < 0',
-        method: 'getNotesIds',
+        title: 'get 0 node\'s id by type, relation id T2 and value < 0',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -315,8 +315,8 @@ module.exports = {
             length: 0
         }
     }, {
-        title: 'get 1 note\'s id by type, relation id T2 and value < 0 and < 3',
-        method: 'getNotesIds',
+        title: 'get 1 node\'s id by type, relation id T2 and value < 0 and < 3',
+        method: 'findNodes',
         params: {
             userId: 'Joe',
             types: ['note'],
@@ -325,7 +325,7 @@ module.exports = {
         result: {
             length: 1,
             checkArray: {
-                0: 'joesNote2'
+                0: 'joesNode2'
             }
         }
     }]

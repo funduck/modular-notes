@@ -1,8 +1,8 @@
 module.exports = {
-    title: 'create note with relation',
+    title: 'create node with relation',
     steps: [{
         title: 'create user`',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -20,7 +20,7 @@ module.exports = {
         }
     }, {
         title: 'create relation first',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             id: 'firstTagId',
             userId: 'Joe',
@@ -38,7 +38,7 @@ module.exports = {
         }
     }, {
         title: 'get relation',
-        method: 'getNotes',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
             ids: ['firstTagId']
@@ -59,14 +59,14 @@ module.exports = {
             }
         }
     }, {
-        title: 'create note with relation',
-        method: 'editNote',
+        title: 'create node with relation',
+        method: 'editNode',
         params: {
-            id: 'noteWithRel',
+            id: 'nodeWithRel',
             userId: 'Joe',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'note with relation',
+            title: 'node with relation',
             content: new Buffer('ok'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -77,20 +77,20 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'get note',
-        method: 'getNotes',
+        title: 'get node',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['noteWithRel']
+            ids: ['nodeWithRel']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'noteWithRel',
+                    id: 'nodeWithRel',
                     author: 'Joe',
                     type: 'note',
-                    title: 'note with relation',
+                    title: 'node with relation',
                     content: new Buffer('ok'),
                     flags: 2,
                     meta: JSON.stringify({}),
@@ -100,9 +100,9 @@ module.exports = {
         }
     }, {
         title: 'remove tag',
-        method: 'editNote',
+        method: 'editNode',
         params: {
-            id: 'noteWithRel',
+            id: 'nodeWithRel',
             userId: 'Joe',
             type: null,
             operation: parseInt('100000', 2),
@@ -117,20 +117,20 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'get note without tag',
-        method: 'getNotes',
+        title: 'get node without tag',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['noteWithRel']
+            ids: ['nodeWithRel']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'noteWithRel',
+                    id: 'nodeWithRel',
                     author: 'Joe',
                     type: 'note',
-                    title: 'note with relation',
+                    title: 'node with relation',
                     content: new Buffer('ok'),
                     flags: 2,
                     meta: JSON.stringify({}),
@@ -140,9 +140,9 @@ module.exports = {
         }
     }, {
         title: 'add tag back',
-        method: 'editNote',
+        method: 'editNode',
         params: {
-            id: 'noteWithRel',
+            id: 'nodeWithRel',
             userId: 'Joe',
             operation: parseInt('100000', 2),
             relationsAdd: ['firstTagId', 'first tag back', null],
@@ -151,20 +151,20 @@ module.exports = {
             error: false,
         }
     }, {
-        title: 'get note with tag',
-        method: 'getNotes',
+        title: 'get node with tag',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['noteWithRel']
+            ids: ['nodeWithRel']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'noteWithRel',
+                    id: 'nodeWithRel',
                     author: 'Joe',
                     type: 'note',
-                    title: 'note with relation',
+                    title: 'node with relation',
                     content: new Buffer('ok'),
                     flags: 2,
                     meta: JSON.stringify({}),

@@ -18,13 +18,13 @@ describe('Http server', function() {
     });
 
     it('create user', (done) => {
-        client.request('editNote', {
+        client.request('editNode', {
             userId: 'Joe',
             id: 'Joe',
             type: 'user',
             operation: parseInt('111110', 2),
             title: 'first test user',
-            content: 'user\'s Note content',
+            content: 'user\'s Node content',
             flags: 2,
             meta: JSON.stringify({
                 created: new Date().toISOString(),
@@ -41,7 +41,7 @@ describe('Http server', function() {
     });
 
     it('get user', (done) => {
-        client.request('getNotes', {
+        client.request('getNodes', {
             userId: 'Joe',
             ids: ['Joe']
         }, function(err, response) {

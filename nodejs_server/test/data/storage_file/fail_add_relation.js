@@ -2,7 +2,7 @@ module.exports = {
     title: 'fail add relation',
     steps: [{
         title: 'create user Joe',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -20,7 +20,7 @@ module.exports = {
         }
     }, {
         title: 'create user Bill',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Bill',
             id: 'Bill',
@@ -37,14 +37,14 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert note by Joe',
-        method: 'editNote',
+        title: 'insert node by Joe',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'test note',
+            title: 'test node',
             content: new Buffer('hello world'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -55,15 +55,15 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert note by Bill',
-        method: 'editNote',
+        title: 'insert node by Bill',
+        method: 'editNode',
         params: {
             userId: 'Bill',
-            id: 'privateNoteId',
+            id: 'privateNodeId',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'private note',
-            content: new Buffer('private note'),
+            title: 'private node',
+            content: new Buffer('private node'),
             flags: 2,
             meta: JSON.stringify({}),
             relationsAdd: [],
@@ -73,25 +73,25 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'fail add relation by Joe without access to Bill\'s note',
-        method: 'editNote',
+        title: 'fail add relation by Joe without access to Bill\'s node',
+        method: 'editNode',
         params: {
-            id: 'testNoteId',
+            id: 'testNodeId',
             userId: 'Joe',
             operation: parseInt('100000', 2),
-            relationsAdd: ['privateNoteId', 'Bill\'s note', null],
+            relationsAdd: ['privateNodeId', 'Bill\'s node', null],
         },
         result: {
             error: true
         }
     }, {
-        title: 'fail add relation by Joe to same note',
-        method: 'editNote',
+        title: 'fail add relation by Joe to same node',
+        method: 'editNode',
         params: {
-            id: 'privateNoteId',
+            id: 'privateNodeId',
             userId: 'Joe',
             operation: parseInt('100000', 2),
-            relationsAdd: ['privateNoteId', 'recursion', null],
+            relationsAdd: ['privateNodeId', 'recursion', null],
         },
         result: {
             error: true

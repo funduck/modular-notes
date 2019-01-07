@@ -11,25 +11,24 @@ module.exports = {
     string[] relationsAdd,
     string[] relationsRm
     */
-    editNote: [
+    editNode: [
         'userId', 'id', 'type', 'operation', 'title', 'content', 'flags', 'meta', 'relationsAdd', 'relationsRm'
     ],
 
     /*
     string userId,
-    string[] ids,
     string[] types,
     string titleRegexp,
     string[] relationsFilterIn,
     string[] relationsFilterOut
     */
-    getNotesIds: ['userId', 'ids', 'types', 'titleRegexp', 'relationsFilterIn', 'relationsFilterOut'],
+    findNodes: ['userId', 'types', 'titleRegexp', 'relationsFilterIn', 'relationsFilterOut'],
 
     /*
     string userId,
     string[] ids
     */
-    getNotes: ['userId', 'ids'],
+    getNodes: ['userId', 'ids'],
 
     /*
     string userId,

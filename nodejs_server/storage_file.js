@@ -29,7 +29,7 @@ module.exports = (config) => {
         return d.promise;
     };
 
-    const getNotes = (ids) => {
+    const getNodes = (ids) => {
         const d = when.defer();
         db.find({
             id: {$in: ids}
@@ -55,36 +55,36 @@ module.exports = (config) => {
         accessHas[allAccessRights[i]] = (val) => (val & Math.pow(2, i)) > 0;
     }
 
-    const calcAccesRights = (idA, noteA, noteB) => {
-        // logger.debug('calcAccesRights()', 'idA:', idA, 'noteA:', noteA, 'noteB:', noteB);
-        if (noteB == null) {
-            // logger.debug('noteB not exists');
+    const calcAccesRights = (idA, nodeA, nodeB) => {
+        // logger.debug('calcAccesRights()', 'idA:', idA, 'nodeA:', nodeA, 'nodeB:', nodeB);
+        if (nodeB == null) {
+            // logger.debug('nodeB not exists');
             return fullAccess;
         }
         // direct rights cover all indirect
-        if (noteB.accessRightsById[idA]) {
-            return noteB.accessRightsById[idA];
+        if (nodeB.accessRightsById[idA]) {
+            return nodeB.accessRightsById[idA];
         }
         // summarize indirect rights
         let rights = 0;
-        for (const rId in noteA.relationsById) {
-            if (noteB.accessRightsById[rId] > 0) {
-                rights = (rights & noteB.accessRightsById[rId]);
+        for (const rId in nodeA.relationsById) {
+            if (nodeB.accessRightsById[rId] > 0) {
+                rights = (rights & nodeB.accessRightsById[rId]);
             }
         }
         return rights;
     };
 
     const getAccessRights = (idA, idB) => {
-        // Note has full access to itself
+        // Node has full access to itself
         if (idA == idB) {
             return when.resolve(fullAccess);
         }
-        return getNotes([idA, idB])
-        .then((notes) => {
-            const noteA = notes[0];
-            const noteB = notes[1];
-            return calcAccesRights(idA, noteA, noteB);
+        return getNodes([idA, idB])
+        .then((nodes) => {
+            const nodeA = nodes[0];
+            const nodeB = nodes[1];
+            return calcAccesRights(idA, nodeA, nodeB);
         });
     };
 
@@ -146,7 +146,7 @@ module.exports = (config) => {
             }, (err, numAffected) => {
                 if (err) return d.reject(err);
                 logger.debug('editAccess result:', numAffected);
-                if (numAffected == 0) return d.reject('Note ' + idB + ' not found');
+                if (numAffected == 0) return d.reject('Node ' + idB + ' not found');
                 d.resolve(numAffected);
             });
             return d.promise;
@@ -160,16 +160,16 @@ module.exports = (config) => {
     }
     operationIs.create = (val) => (val & 62) == 62;
 
-    storage.editNote = (
+    storage.editNode = (
         userId, id, type, operation, title, content, flags, meta, relationsAdd, relationsRm
     ) => {
-        logger.verbose('editNote()');
+        logger.verbose('editNode()');
         logger.debug(
-            'editNote() args:', userId, id, type, operation, title, content, flags, meta, relationsAdd, relationsRm
+            'editNode() args:', userId, id, type, operation, title, content, flags, meta, relationsAdd, relationsRm
         );
         try {
             assert(userId != null, '"userId" cannot be null');
-            assert(id != null, 'note "id" cannot be null');
+            assert(id != null, 'node "id" cannot be null');
             assert(operation != null, '"operation" cannot be null');
         } catch (e) {
             return when.reject(e);
@@ -186,7 +186,7 @@ module.exports = (config) => {
                     assert(accessHas.delete(rights), 'user has no right to delete ' + id);
                     const d = when.defer();
                     db.remove({id: id}, (err, numAffected) => {
-                        logger.debug('editNote() result:', err, numAffected);
+                        logger.debug('editNode() result:', err, numAffected);
                         if (err) d.reject(err);
                         else d.resolve(numAffected);
                     });
@@ -222,7 +222,7 @@ module.exports = (config) => {
                             const rId = relationsAdd[3*i + 0];
                             const rTitle = relationsAdd[3*i + 1];
                             const rValue = relationsAdd[3*i + 2];
-                            assert(rId != id, '"relations" cant have the note itself');
+                            assert(rId != id, '"relations" cant have the node itself');
                             assert(rId != null, '"relations" must have ids');
                             set['relationsById.' + rId] = {
                                 loc_title: rTitle,
@@ -234,7 +234,7 @@ module.exports = (config) => {
                     if (relationsRm && relationsRm.length > 0) {
                         for (let i = 0; i < relationsRm.length; i++) {
                             const rId = relationsRm[i];
-                            assert(rId != id, '"relations" cant have the note itself');
+                            assert(rId != id, '"relations" cant have the node itself');
                             assert(rId != null, '"relations" must have ids');
                             unset['relationsById.' + rId] = true;
                             relIds.push(rId);
@@ -255,23 +255,23 @@ module.exports = (config) => {
             }
             return when()
             .then(() => {
-                // check that user can 'relate' to notes
+                // check that user can 'relate' to nodes
                 if (relIds.length > 0) {
-                    return getNotes(relIds.concat(userId))
-                    .then((notes) => {
-                        const userNote = notes.pop();
-                        for (let i = 0; i < notes.length; i++) {
-                            const note = notes[i];
-                            assert(note != null, 'relation ' + relIds[i] + ' not found');
-                            if (!hasUserRightOnNote(userId, userNote, note, 'relate')) {
-                                throw new Error('user ' + userId + ' cant relate to ' + note.id);
+                    return getNodes(relIds.concat(userId))
+                    .then((nodes) => {
+                        const userNode = nodes.pop();
+                        for (let i = 0; i < nodes.length; i++) {
+                            const node = nodes[i];
+                            assert(node != null, 'relation ' + relIds[i] + ' not found');
+                            if (!hasUserRightOnNode(userId, userNode, node, 'relate')) {
+                                throw new Error('user ' + userId + ' cant relate to ' + node.id);
                             }
                             // setting "type" for easier search
                             if (relationsAdd && i < relationsAdd.length / 3) {
-                                set['relationsByType.' + note.type +'.' + note.id] = true;
-                                set['relationsById.' + note.id].type = note.type;
+                                set['relationsByType.' + node.type +'.' + node.id] = true;
+                                set['relationsById.' + node.id].type = node.type;
                             } else {
-                                unset['relationsByType.' + note.type +'.' + note.id] = true;
+                                unset['relationsByType.' + node.type +'.' + node.id] = true;
                             }
                         }
                     });
@@ -282,9 +282,9 @@ module.exports = (config) => {
                 logger.debug('unset:', unset);
                 const d = when.defer();
                 db.update({id: id}, {$set: set, $unset: unset}, {upsert: upsert}, (err, numAffected) => {
-                    logger.debug('editNote() result:', err, numAffected);
+                    logger.debug('editNode() result:', err, numAffected);
                     if (err) return d.reject(err);
-                    if (numAffected == 0) return d.reject('Note not found');
+                    if (numAffected == 0) return d.reject('Node not found');
                     d.resolve(numAffected);
                 });
                 return d.promise;
@@ -292,10 +292,10 @@ module.exports = (config) => {
         });
     };
 
-    const addToFilterAccessByUser = (filter, userId, userNote) => {
-        // logger.debug('addToFilterAccessByUser()', filter, userId, userNote);
-        // find Notes with any kind of access from user, then filter out those without read access
-        const rIds = Object.keys(userNote.relationsById || {});
+    const addToFilterAccessByUser = (filter, userId, userNode) => {
+        // logger.debug('addToFilterAccessByUser()', filter, userId, userNode);
+        // find Nodes with any kind of access from user, then filter out those without read access
+        const rIds = Object.keys(userNode.relationsById || {});
         rIds.push(userId);
         filter.$or = [];
         for (let i = 0; i < rIds.length; i++) {
@@ -305,8 +305,8 @@ module.exports = (config) => {
         }
     };
 
-    const hasUserRightOnNote = (userId, userNote, note, rightName) => {
-        return accessHas[rightName](calcAccesRights(userId, userNote, note));
+    const hasUserRightOnNode = (userId, userNode, node, rightName) => {
+        return accessHas[rightName](calcAccesRights(userId, userNode, node));
     };
 
     const makeRelationsFilter = (relationsFilter) => {
@@ -337,18 +337,18 @@ module.exports = (config) => {
         return filter;
     };
 
-    storage.getNotesIds = (
+    storage.findNodes = (
         userId, ids, types, titleRegexp, relationsFilterIn, relationsFilterOut
     ) => {
-        logger.verbose('getNotesIds()');
+        logger.verbose('findNodes()');
         logger.debug(
-            'getNotesIds() args:', userId, ids, types, titleRegexp, relationsFilterIn, relationsFilterOut
+            'findNodes() args:', userId, ids, types, titleRegexp, relationsFilterIn, relationsFilterOut
         );
-        return getNotes([userId])
-        .then((notes) => {
+        return getNodes([userId])
+        .then((nodes) => {
             const filter = {};
-            const userNote = notes[0];
-            addToFilterAccessByUser(filter, userId, userNote);
+            const userNode = nodes[0];
+            addToFilterAccessByUser(filter, userId, userNode);
             try {
                 if (ids) {
                     filter.id = {$in: ids};
@@ -380,25 +380,25 @@ module.exports = (config) => {
                 if (err) return d.reject(err);
                 const res = [];
                 for (let i = 0; i < docs.length; i++) {
-                    const note = docs[i];
-                    if (!hasUserRightOnNote(userId, userNote, note, 'read')) continue;
-                    res.push(note.id);
+                    const node = docs[i];
+                    if (!hasUserRightOnNode(userId, userNode, node, 'read')) continue;
+                    res.push(node.id);
                 }
-                logger.debug('getNotesIds() result:', err, res);
+                logger.debug('findNodes() result:', err, res);
                 d.resolve(res);
             });
             return d.promise;
         });
     };
 
-    storage.getNotes = (userId, ids) => {
-        logger.verbose('getNotes()');
-        logger.debug('getNotes() args:', userId, ids);
-        return getNotes([userId])
-        .then((notes) => {
+    storage.getNodes = (userId, ids) => {
+        logger.verbose('getNodes()');
+        logger.debug('getNodes() args:', userId, ids);
+        return getNodes([userId])
+        .then((nodes) => {
             const filter = {id: {$in: ids}};
-            const userNote = notes[0];
-            addToFilterAccessByUser(filter, userId, userNote);
+            const userNode = nodes[0];
+            addToFilterAccessByUser(filter, userId, userNode);
             const d = when.defer();
             logger.debug('db.find()', JSON.stringify(filter, null, '  '));
             db.find(filter, {
@@ -416,25 +416,25 @@ module.exports = (config) => {
                 if (err) return d.reject(err);
                 const res = [];
                 for (let i = 0; i < docs.length; i++) {
-                    const note = docs[i];
-                    if (!hasUserRightOnNote(userId, userNote, note, 'read')) continue;
-                    note.relations = [];
-                    note.content = (typeof note.content == 'object' && note.content.type == 'Buffer')
+                    const node = docs[i];
+                    if (!hasUserRightOnNode(userId, userNode, node, 'read')) continue;
+                    node.relations = [];
+                    node.content = (typeof node.content == 'object' && node.content.type == 'Buffer')
                         ?
-                        Buffer.from(note.content.data)
+                        Buffer.from(node.content.data)
                         :
-                        note.content;
-                    for (const rId in note.relationsById) {
-                        note.relations.push(note.relationsById[rId].type);
-                        note.relations.push(rId);
-                        note.relations.push(note.relationsById[rId].loc_title);
-                        note.relations.push(note.relationsById[rId].loc_value);
+                        node.content;
+                    for (const rId in node.relationsById) {
+                        node.relations.push(node.relationsById[rId].type);
+                        node.relations.push(rId);
+                        node.relations.push(node.relationsById[rId].loc_title);
+                        node.relations.push(node.relationsById[rId].loc_value);
                     }
-                    delete note.relationsById;
-                    delete note.accessRightsById;
-                    res.push(note);
+                    delete node.relationsById;
+                    delete node.accessRightsById;
+                    res.push(node);
                 }
-                logger.debug('getNotes() result:', err, res);
+                logger.debug('getNodes() result:', err, res);
                 d.resolve(res);
             });
             return d.promise;

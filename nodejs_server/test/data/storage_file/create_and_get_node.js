@@ -1,8 +1,8 @@
 module.exports = {
-    title: 'create note & get note',
+    title: 'create node & get node',
     steps: [{
         title: 'create user`',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -19,14 +19,14 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert test note',
-        method: 'editNote',
+        title: 'insert test node',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'test note',
+            title: 'test node',
             content: new Buffer('hello world'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -37,20 +37,20 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'get note',
-        method: 'getNotes',
+        title: 'get node',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
-                    title: 'test note',
+                    title: 'test node',
                     content: new Buffer('hello world'),
                     flags: 2,
                     meta: JSON.stringify({})

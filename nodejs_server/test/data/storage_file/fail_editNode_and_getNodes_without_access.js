@@ -1,8 +1,8 @@
 module.exports = {
-    title: 'fail editNote and getNotes witout access',
+    title: 'fail editNode and getNodes witout access',
     steps: [{
         title: 'create user Joe',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -20,7 +20,7 @@ module.exports = {
         }
     }, {
         title: 'create user Bill',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Bill',
             id: 'Bill',
@@ -37,14 +37,14 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert test note by Joe',
-        method: 'editNote',
+        title: 'insert test node by Joe',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'test note',
+            title: 'test node',
             content: new Buffer('hello world'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -55,32 +55,32 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'fail change note by Bill',
-        method: 'editNote',
+        title: 'fail change node by Bill',
+        method: 'editNode',
         params: {
             userId: 'Bill',
-            id: 'testNoteId',
+            id: 'testNodeId',
             operation: parseInt('000010', 2),
-            title: 'test note edited'
+            title: 'test node edited'
         },
         result: {
             error: true
         }
     }, {
-        title: 'get note by Joe',
-        method: 'getNotes',
+        title: 'get node by Joe',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
-                    title: 'test note',
+                    title: 'test node',
                     content: new Buffer('hello world'),
                     flags: 2,
                     meta: JSON.stringify({})
@@ -88,11 +88,11 @@ module.exports = {
             }
         }
     }, {
-        title: 'fail get note by Bill',
-        method: 'getNotes',
+        title: 'fail get node by Bill',
+        method: 'getNodes',
         params: {
             userId: 'Bill',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 0

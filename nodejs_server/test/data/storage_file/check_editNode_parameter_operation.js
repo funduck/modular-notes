@@ -1,8 +1,8 @@
 module.exports = {
-    title: 'check editNote parameter "operation"',
+    title: 'check editNode parameter "operation"',
     steps: [{
         title: 'create user`',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'Joe',
@@ -19,14 +19,14 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert note',
-        method: 'editNote',
+        title: 'insert node',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: 'note',
             operation: parseInt('111110', 2),
-            title: 'test note',
+            title: 'test node',
             content: new Buffer('hello world'),
             flags: 2,
             meta: JSON.stringify({}),
@@ -37,8 +37,8 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert tag note',
-        method: 'editNote',
+        title: 'insert tag node',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'someTagId',
@@ -55,8 +55,8 @@ module.exports = {
             error: false
         }
     }, {
-        title: 'insert image note',
-        method: 'editNote',
+        title: 'insert image node',
+        method: 'editNode',
         params: {
             userId: 'Joe',
             id: 'someImageId',
@@ -74,10 +74,10 @@ module.exports = {
         }
     }, {
         title: 'should change only title',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: null,
             operation: parseInt('000010', 2),
             title: 'changed title',
@@ -92,16 +92,16 @@ module.exports = {
         }
     }, {
         title: 'check only title changed',
-        method: 'getNotes',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
                     title: 'changed title',
@@ -114,10 +114,10 @@ module.exports = {
         }
     }, {
         title: 'should change only content',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: null,
             operation: parseInt('000100', 2),
             title: 'changed title 2',
@@ -132,16 +132,16 @@ module.exports = {
         }
     }, {
         title: 'check only content changed',
-        method: 'getNotes',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
                     title: 'changed title',
@@ -154,10 +154,10 @@ module.exports = {
         }
     }, {
         title: 'should change only flags',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: null,
             operation: parseInt('001000', 2),
             title: 'changed title 2',
@@ -172,16 +172,16 @@ module.exports = {
         }
     }, {
         title: 'check only flags changed',
-        method: 'getNotes',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
                     title: 'changed title',
@@ -194,10 +194,10 @@ module.exports = {
         }
     }, {
         title: 'should change only meta',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: null,
             operation: parseInt('010000', 2),
             title: 'changed title 2',
@@ -212,16 +212,16 @@ module.exports = {
         }
     }, {
         title: 'check only meta changed',
-        method: 'getNotes',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
                     title: 'changed title',
@@ -234,10 +234,10 @@ module.exports = {
         }
     }, {
         title: 'should change only relations',
-        method: 'editNote',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             type: null,
             operation: parseInt('100000', 2),
             title: 'changed title 2',
@@ -252,16 +252,16 @@ module.exports = {
         }
     }, {
         title: 'check only relations changed',
-        method: 'getNotes',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 1,
             checkArray: {
                 0: {
-                    id: 'testNoteId',
+                    id: 'testNodeId',
                     author: 'Joe',
                     type: 'note',
                     title: 'changed title',
@@ -273,22 +273,22 @@ module.exports = {
             }
         }
     }, {
-        title: 'delete note',
-        method: 'editNote',
+        title: 'delete node',
+        method: 'editNode',
         params: {
             userId: 'Joe',
-            id: 'testNoteId',
+            id: 'testNodeId',
             operation: parseInt('000001', 2)
         },
         result: {
             error: false
         }
     }, {
-        title: 'check note is deleted',
-        method: 'getNotes',
+        title: 'check node is deleted',
+        method: 'getNodes',
         params: {
             userId: 'Joe',
-            ids: ['testNoteId']
+            ids: ['testNodeId']
         },
         result: {
             length: 0
