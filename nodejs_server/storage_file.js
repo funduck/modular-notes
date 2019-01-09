@@ -225,8 +225,8 @@ module.exports = (config) => {
                             assert(rId != id, '"relations" cant have the node itself');
                             assert(rId != null, '"relations" must have ids');
                             set['relationsById.' + rId] = {
-                                loc_title: rTitle,
-                                loc_value: rValue
+                                local_title: rTitle,
+                                local_value: rValue
                             };
                             relIds.push(rId);
                         }
@@ -324,12 +324,12 @@ module.exports = (config) => {
                     filter['relationsById.' + rId] = {$exists: true};
                 }
                 if (rValMin != null) {
-                    filter['relationsById.' + rId +'.loc_value'] = filter['relationsById.' + rId +'.loc_value'] || {};
-                    filter['relationsById.' + rId +'.loc_value'].$gte = parseFloat(rValMin, 10);
+                    filter['relationsById.' + rId +'.local_value'] = filter['relationsById.' + rId +'.local_value'] || {};
+                    filter['relationsById.' + rId +'.local_value'].$gte = parseFloat(rValMin, 10);
                 }
                 if (rValMax != null) {
-                    filter['relationsById.' + rId +'.loc_value'] = filter['relationsById.' + rId +'.loc_value'] || {};
-                    filter['relationsById.' + rId +'.loc_value'].$lte = parseFloat(rValMax, 10);
+                    filter['relationsById.' + rId +'.local_value'] = filter['relationsById.' + rId +'.local_value'] || {};
+                    filter['relationsById.' + rId +'.local_value'].$lte = parseFloat(rValMax, 10);
                 }
             }
         }
@@ -427,8 +427,8 @@ module.exports = (config) => {
                     for (const rId in node.relationsById) {
                         node.relations.push(node.relationsById[rId].type);
                         node.relations.push(rId);
-                        node.relations.push(node.relationsById[rId].loc_title);
-                        node.relations.push(node.relationsById[rId].loc_value);
+                        node.relations.push(node.relationsById[rId].local_title);
+                        node.relations.push(node.relationsById[rId].local_value);
                     }
                     delete node.relationsById;
                     delete node.accessRightsById;
