@@ -1,0 +1,86 @@
+--aBoundaryString
+Content-Disposition: form-data; name="id"
+Content-Type: text/plain
+
+2
+--aBoundaryString
+Content-Disposition: form-data; name="class"
+Content-Type: text/plain
+
+image
+--aBoundaryString
+Content-Disposition: form-data; name="title"
+Content-Type: text/plain
+
+i saw dalmatian
+--aBoundaryString
+Content-Disposition: form-data; name="ctype"
+Content-Type: text/plain
+
+image/jpeg
+--aBoundaryString
+Content-Disposition: form-data; name="content"
+Content-Type: application/octet-stream
+
+<raw binary image content>
+--aBoundaryString
+Content-Disposition: form-data; name="flags"
+Content-Type: text/plain
+
+42
+--aBoundaryString
+Content-Disposition: form-data; name="meta"
+Content-Type: text/plain
+
+{"date": "09-01-2019"}
+--aBoundaryString
+Content-Disposition: form-data; name="relations"
+Content-Type: text/plain
+
+4,"dalmatian",1
+--aBoundaryString
+Content-Disposition: form-data; name="id"
+Content-Type: text/plain
+
+5
+--aBoundaryString
+Content-Disposition: form-data; name="class"
+Content-Type: text/plain
+
+image
+--aBoundaryString
+Content-Disposition: form-data; name="title"
+Content-Type: text/plain
+
+i saw another dog
+--aBoundaryString
+Content-Disposition: form-data; name="ctype"
+Content-Type: text/plain
+
+image/jpeg
+--aBoundaryString
+Content-Disposition: form-data; name="content"
+Content-Type: application/octet-stream
+
+<raw binary another image content>
+--aBoundaryString
+Content-Disposition: form-data; name="flags"
+Content-Type: text/plain
+
+42
+--aBoundaryString
+Content-Disposition: form-data; name="meta"
+Content-Type: text/plain
+
+{"date": "10-01-2019"}
+--aBoundaryString
+Content-Disposition: form-data; name="relations"
+Content-Type: text/plain
+
+4,"another",1,3,"mammal",1
+--aBoundaryString
+Content-Disposition: form-data; name="nextCursor"
+Content-Type: text/plain
+
+<URI encoded URL for next page: /nodes?user=1&idMin=4&classIn=note,image,video&titleRegexp=%20dog&sort=asc&limit=10>
+--aBoundaryString--
