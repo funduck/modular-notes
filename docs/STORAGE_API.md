@@ -13,6 +13,7 @@ to get multiple or search with paging
     &<id or idIn>=<**idIn**>&idOut=<**idOut**>&idMin=<**idMin**>&idMax=<**idMax**>
     &classIn=<**classIn**>&classOut=<**classOut**>
     &titleRegexp=<**titleRegexp**>
+    &contentRegexp=<**contentRegexp**>
     &relationsIn=<**relationsIn**>&relationsOut=<**relationsOut**>
     &responseFields=<**responseFields**>
     &sort=<**sort**>&<cursor=<**cursor**>&skip=<**offset**>&limit=<**limit**>
@@ -29,6 +30,7 @@ If **id or idIn** were in request and user doesn't have access to even one *Node
 * string **classIn** - comma separated URI encoded *Node* classes
 * string **classOut** - comma separated URI encoded *Node* classes
 * string **titleRegexp** - URI encoded regular expression for *Node* title
+* string **contentRegexp** - URI encoded regular expression for *Node* content, only if *Node* ctype is 'plain/text'
 * string **relationsIn** - comma separated URI encoded `<class1>,<rel1_id>,<rel1_val_min>,<rel1_val_max>,<class2>, ...` length is multiple of 4
 * string **relationsOut** - comma separated URI encoded `<class1>,<rel1_id>,<rel1_val_min>,<rel1_val_max>,<class2>, ...` length is multiple of 4
 * string **responseFields** - comma separated URI encoded *Node* field names
@@ -38,6 +40,7 @@ If **id or idIn** were in request and user doesn't have access to even one *Node
 * int **limit** - paging option when no cursor is available or for random access
 
 Paging options **cursor** and **offset** + **limit** are mutually exclusive.
+TODO Regular expression standard must be defined precisely.
 
 ### Response
 Body:
@@ -143,9 +146,9 @@ Response body:
     4,"another",1,3,"mammal",1
     --aBoundaryString
     Content-Disposition: form-data; name="nextCursor"
-    Content-Type: text/plain
+    Content-Type: application/x-www-form-urlencoded
 
-    <URI encoded URL for next page: /nodes?user=1&idMin=4&classIn=note,image,video&titleRegexp=%20dog&sort=asc&limit=10>
+    idMin=4&classIn=note,image,video&titleRegexp=%20dog&sort=asc&limit=10
     --aBoundaryString--
 
 

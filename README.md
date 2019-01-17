@@ -7,12 +7,12 @@ This project is an attempt to build a notes taking application with two main pro
 Frontend we call App, backend is Backend. Lets dive in those two.
 
 ## Top level - ServerAPI
-ServerAPI separates App from Backend, App must have config for server so that it would be easy to switch to any other available server and App continues to run. Later we'll think about migration tool, it should be quite easy since all servers will have same api.
+ServerAPI separates App from Backend, App must have config for server for it would be easy to switch to any other available server and App continues to run. Later we'll think about migration tool, it should be quite easy since all servers will have same api.
 ```mermaid
 sequenceDiagram
     User->>App: some action
     App->>Backend: ServerAPI REST request
-    Backend->>App: JSON response
+    Backend->>App: multipart/form-data response
     App->>User: draws something
 ```
 
@@ -27,7 +27,7 @@ sequenceDiagram
     App.ui-->>App.model: ModelAPI
     App.model-->>App.core: CoreAPI
     App.core->>Backend: ServerAPI REST request
-    Backend->>App.core: JSON response
+    Backend->>App.core: multipart/form-data response
     App.core-->>App.model: s
     App.model-->>App.ui: s
     App.ui->>User: draws something
@@ -41,8 +41,8 @@ Two http servers seems the easiest way to completely separate these two modules.
 sequenceDiagram
     App->>Backend.server: ServerAPI REST request
     Backend.server->>Backend.storage: StorageAPI REST request
-    Backend.storage->>Backend.server: pure HTTP response
-    Backend.server->>App: JSON response
+    Backend.storage->>Backend.server: multipart/form-data response
+    Backend.server->>App: multipart/form-data response
 ```
 
 ## APIs
