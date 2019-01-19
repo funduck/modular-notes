@@ -17,20 +17,20 @@ So I need:
 Frontend we call App, backend is Backend. Lets dive in those two.
 
 ## Top level - ServerAPI
-ServerAPI separates **App** from **Backend**  
-**App** must have config for server so it would be easy to switch to any other server
+ServerAPI separates App from Backend  
+App must have config for server so it would be easy to switch to any other server
 ```mermaid
 sequenceDiagram
-    User ->> App: some action
-    App ->> Backend: ServerAPI REST request
-    Backend ->> App: pure HTTP response
-    App ->> User: draws something
+    User    ->> App:        some action
+    App     ->> Backend:    ServerAPI REST request
+    Backend ->> App:        pure HTTP response
+    App     ->> User:       draws something
 ```
 
 ## App level - Model and Core
-What does any application do? It provides User with some model of his data. It takes User's data and keeps in some structure. Model contains that logic.  
-And the logic can be built on some low level system and that is what Core is - basic access system for data.  
-And User is provided with some interface - UI.  
+What does any application do? It provides User with some model of his data. It takes User's data and keeps in some structure. **Model** contains that logic.  
+And the logic can be built on some low level system and that is what **Core** is - basic access system for data.  
+And User is provided with some interface - **UI**.  
 So App consists of several modules:
 ```mermaid
 sequenceDiagram
@@ -73,7 +73,7 @@ We can play with any application setting up locally any **server + storage + ind
 We can have different servers for different applications or run all of them on one server or we can have different servers for one application and sync data between them.  
 
 # Basic idea of data model
-There are several basic objects: *Node*, *Relation*, *Access*
+There are several basic objects: Node, Relation, Access
 
 ## Objects
 ### Node
@@ -90,12 +90,12 @@ User is a *Node*, all it creates is a *Node*.
 * Relation[] **relations**
 
 ### Relation
-*Relation* is a connection to other *Node* and contained in a *Node*.  
-*Node* cannot relate to itself.  
-To build a *Relation* one needs access to both *Nodes*.  
-*Node* can have multiple *Relations* - different kinds of objects: tags, images, etc.  
-*Relation* used in a *Node* can have a **local_title** covering title of related *Node*, for example we have a *Node* of class='note' with text: 'It was amazing show when _Bobby jumped from the balcony to a snow hill_ below.', we could hide a picture of Bobby jumping from the balcony under those words, and that _italic_ text could be a reference, while in another note we could reference to the same picture with some other text.  
-*Relation* used in a *Node* may have a **local_value**, a number if the *Relation* has idea of it, for example for text 'Seen Lamborghini in a street, think it costs about 300 000 $' we could save relation 'price' with value '300000'.
+Relation is a connection to other Node and contained in a Node.  
+Node cannot relate to itself.  
+To build a Relation one needs access to both Nodes.  
+Node can have multiple Relations - different kinds of objects: tags, images, etc.  
+Relation used in a Node can have a **local_title** covering title of related Node, for example we have a Node of class='note' with text: 'It was amazing show when _Bobby jumped from the balcony to a snow hill_ below.', we could hide a picture of Bobby jumping from the balcony under those words, and that _italic_ text could be a reference, while in another note we could reference to the same picture with some other text.  
+Relation used in a Node may have a **local_value**, a number if the Relation has idea of it, for example for text 'Seen Lamborghini in a street, think it costs about 300 000 $' we could save relation 'price' with value '300000'.
 * string **class** - related Node class
 * int **id** - related Node id
 * string **local_title** - local synonym for related Node that can be used in this Node
