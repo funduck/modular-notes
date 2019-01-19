@@ -1,7 +1,7 @@
 # Modular Notes
 At first this project is an attempt to build a notes taking application with lots of different builds:
-* application can be easily implemented using some *Core*
-* what application does doesn't depend on backend, logic is defined in a *Model*
+* application can be easily implemented using some *core*
+* what application does doesn't depend on backend, logic is defined in a *model*
 
 That obviously leads to possibilities:
 * to have multiple different applications over same data, comparing them, switching from one to another if they share the logic
@@ -17,30 +17,31 @@ So I need:
 Frontend we call App, backend is Backend. Lets dive in those two.
 
 ## Top level - ServerAPI
-ServerAPI separates App from Backend, App must have config for server for it would be easy to switch to any other available server and App continues to run. Later we'll think about migration tool, it should be quite easy since all servers will have same api.  
+ServerAPI separates **App** from **Backend**  
+**App** must have config for server so it would be easy to switch to any other server
 ```mermaid
 sequenceDiagram
-    User->>App: some action
-    App->>Backend: ServerAPI REST request
-    Backend->>App: pure HTTP response
-    App->>User: draws something
+    User ->> App: some action
+    App ->> Backend: ServerAPI REST request
+    Backend ->> App: pure HTTP response
+    App ->> User: draws something
 ```
 
 ## App level - Model and Core
-What does any application do is it provides User with some **Model** of his data. It takes User's data and keeps in some structure.  
-This structure may be built on some low level system and that is what **Core** is - basic access system for data.  
-And finally User is provided with some interface - **UI**.  
+What does any application do? It provides User with some model of his data. It takes User's data and keeps in some structure. Model contains that logic.  
+And the logic can be built on some low level system and that is what Core is - basic access system for data.  
+And User is provided with some interface - UI.  
 So App consists of several modules:
 ```mermaid
 sequenceDiagram
-    User->>App.ui: some action
-    App.ui-->>App.model: ModelAPI
-    App.model-->>App.core: CoreAPI
-    App.core->>Backend: ServerAPI REST request
-    Backend->>App.core: pure HTTP response
-    App.core-->>App.model: s
-    App.model-->>App.ui: s
-    App.ui->>User: draws something
+    User        ->>     App.ui:     some action
+    App.ui     -->>     App.model:  ModelAPI
+    App.model  -->>     App.core:   CoreAPI
+    App.core    ->>     Backend:    ServerAPI REST request
+    Backend     ->>     App.core:   pure HTTP response
+    App.core   -->>     App.model:  CoreApi result
+    App.model  -->>     App.ui:     ModelAPI result
+    App.ui      ->>     User:       draws something
 ```
 
 ## Backend level
@@ -50,12 +51,12 @@ Backend.index - protected server - provides additional index for data, especiall
 Http servers seems the easiest way to completely separate these modules.  
 ```mermaid
 sequenceDiagram
-    App->>Backend.server: ServerAPI REST request
-    Backend.server->>Backend.storage: StorageAPI REST request
-    Backend.storage->>Backend.server: pure HTTP response
-    Backend.server->>Backend.index: IndexAPI REST request
-    Backend.index->>Backend.server: pure HTTP response
-    Backend.server->>App: pure HTTP response
+    App             ->> Backend.server:  ServerAPI REST request
+    Backend.server  ->> Backend.storage: StorageAPI REST request
+    Backend.storage ->> Backend.server:  pure HTTP response
+    Backend.server  ->> Backend.index:   IndexAPI REST request
+    Backend.index   ->> Backend.server:  pure HTTP response
+    Backend.server  ->> App:             pure HTTP response
 ```
 
 ## Modules
@@ -76,9 +77,6 @@ There are several basic objects: *Node*, *Relation*, *Access*
 
 ## Objects
 ### Node
-TODO what if all is encrypted?
-TODO do something with flags  
-
 Every data is a *Node*, field **class** tells what.
 User is a *Node*, all it creates is a *Node*.
 * int **id** - unique serial integer being assigned to *Node* on create
@@ -113,16 +111,16 @@ To build a *Relation* one needs access to both *Nodes*.
 *Node* can have *Access* to other *Node*, that's direct access.
 ```mermaid
     sequenceDiagram
-    Node_A->>Node_C: *Access* with rights R
-    Node_A->>Node_C: access with rights R
+    Node_A ->> Node_C: *Access* with rights R
+    Node_A ->> Node_C: access with rights R
 ```
 #### Indirect
 There is also indirect access, when *Node_A* relates to *Node_B* and *Node_B* has direct access to *Node_C* then *Node_A* has access to *Node_C*, same as *Node_B*.  
 ```mermaid
     sequenceDiagram
-    Node_A-->>Node_B: Relation
-    Node_B->>Node_C: *Access* with rights R
-    Node_A->>Node_C: access with same rights R
+    Node_A -->> Node_B: Relation
+    Node_B ->> Node_C: *Access* with rights R
+    Node_A ->> Node_C: access with same rights R
 ```
 So if *Node* allows to relate to it, it gives access to all *Nodes* accessible for it.
 
@@ -130,20 +128,20 @@ So if *Node* allows to relate to it, it gives access to all *Nodes* accessible f
 If *Node_A* has no direct access and has multiple indirect accesses to *Node_C*, then indirect rights are summarized.
 ```mermaid
     sequenceDiagram
-    Node_A->>Node_C: *Access* with rights X
-    Node_A->>Node_C: *Access* with rights Y
-    Node_A->>Node_C: *Access* with rights Z
-    Node_A->>Node_C: access with rights X + Y + Z
+    Node_A ->> Node_C: *Access* with rights X
+    Node_A ->> Node_C: *Access* with rights Y
+    Node_A ->> Node_C: *Access* with rights Z
+    Node_A ->> Node_C: access with rights X + Y + Z
 ```
 
 #### Composition of direct and indirect Accesses
 If *Node_A* has direct access to *Node_C*, then only direct rights are applied.
 ```mermaid
     sequenceDiagram
-    Node_A-->>Node_B: Relation
-    Node_B->>Node_C: *Access* with rights X
-    Node_A->>Node_C: *Access* with rights Y
-    Node_A->>Node_C: access with rights Y even if X is more powerful
+    Node_A -->> Node_B: Relation
+    Node_B ->> Node_C: *Access* with rights X
+    Node_A ->> Node_C: *Access* with rights Y
+    Node_A ->> Node_C: access with rights Y even if X is more powerful
 ```
 
 #### Change Access

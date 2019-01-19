@@ -102,12 +102,12 @@ When Index is turned on it starts indexing all new created *Nodes* and indexes a
 Server asynchronously updates Index only if Storage responds with success.
 ```mermaid
 sequenceDiagram
-    App->>Backend.server: POST
-    Backend.server->>Backend.storage: POST
-    Backend.storage->>Backend.server: 200 response
-    Backend.server->>App: 200 response
-    Backend.server->>Backend.index: update index
-    Backend.index->>Backend.server: index ok
+    App             ->> Backend.server:     POST
+    Backend.server  ->> Backend.storage:    POST
+    Backend.storage ->> Backend.server:     200 response
+    Backend.server  ->> App:                200 response
+    Backend.server  ->> Backend.index:      POST
+    Backend.index   ->> Backend.server:     200 response
 ```
 
 ## On Get Nodes
@@ -118,18 +118,18 @@ Tip: using external index for optimal performance Server may first find ids and 
 Server reads Index, receives array of **id**, modifies original request and reads *Nodes*. Repeats until **limit** is reached or there are no more records in Index. If more records needed Server continues reading Storage with option **idMax** == last *Node* read from Index.
 ```mermaid
 sequenceDiagram
-    App->>Backend.server: GET
+    App ->> Backend.server: GET
     loop indexScan down from end
-        Backend.server->>Backend.index: GET index
-        Backend.index->>Backend.server: index data
-        Backend.server->>Backend.storage: GET modified by index data
-        Backend.storage->>Backend.server: part of response
+        Backend.server  ->> Backend.index:      GET index
+        Backend.index   ->> Backend.server:     index data
+        Backend.server  ->> Backend.storage:    GET modified by index data
+        Backend.storage ->> Backend.server:     part of response
     end
     loop storageScan down from min Node.id in index
-        Backend.server->>Backend.storage: GET
-        Backend.storage->>Backend.server: part of response
+        Backend.server  ->> Backend.storage:    GET
+        Backend.storage ->> Backend.server:     part of response
     end
-    Backend.server->>App: response
+    Backend.server  ->> App: response
 ```
 
 ## Ascending
@@ -137,18 +137,18 @@ Server gets min **id** in Index by reading Index with **limit** = 1, it will be 
 
 ```mermaid
 sequenceDiagram
-    App->>Backend.server: GET
-    Backend.server->>Backend.index: GET indexStart
-    Backend.index->>Backend.server: index data
+    App ->> Backend.server: GET
+    Backend.server  ->> Backend.index:      GET indexStart
+    Backend.index   ->> Backend.server:     index data
     loop storageScan up to indexStart
-        Backend.server->>Backend.storage: GET
-        Backend.storage->>Backend.server: part of response
+        Backend.server  ->> Backend.storage:    GET
+        Backend.storage ->> Backend.server:     part of response
     end
     loop indexScan up from indexStart
-        Backend.server->>Backend.index: get index
-        Backend.index->>Backend.server: index data
-        Backend.server->>Backend.storage: GET modified by index data
-        Backend.storage->>Backend.server: part of response
+        Backend.server  ->> Backend.index:      GET index
+        Backend.index   ->> Backend.server:     index data
+        Backend.server  ->> Backend.storage:    GET modified by index data
+        Backend.storage ->> Backend.server:     part of response
     end
-    Backend.server->>App: response
+    Backend.server  ->> App: response
 ```

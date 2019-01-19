@@ -3,7 +3,7 @@ Client application module providing access to Server.
 *Node* is used as described [here](../README.md#node)  
 *Access* is used as described [here](../README.md#access)  
 
-# API
+# Main API
 Every method returns some kind of object with properties:
 * error - that can be null
 * result - that can also be null
@@ -104,51 +104,41 @@ null
 ### Returns
 null
 
-# Server Config
-TODO localhost?  
-TODO Server on file storage ?  
-KeyValuePairs - `host=<> port=<>`
-
-# Bit variables
-Using integer for **operation**, **flags** and **rights** may not be the most comfortable so there are methods for constructing those variables.
-## Node flags
-There is a bunch of flags that can be set:
-
+# Helpers
+## Bit variables methods
+Using integer for **operation**, **flags** and **rights** may not be the most comfortable so there are methods for constructing those variables.  
+They all share the interface
+Parameters
+* int **currentValue**
+* string **what**
+* boolean **status**
+Returns
+* int
+### NodeFlag
     title_encrypted, content_encrypted
-
-And a method for it:
-
-    int NodeFlag(int flags, string what, boolean status)
 
 Example
 
     flag = NodeFlag(0, 'title_encrypted', true)
     flag = NodeFlag(flag, 'content_encrypted', true)
 
-## Edit Node operation
-There are things that operation affects:
-
+### EditNodeOperation
     relations, meta, flags, content, title, delete
-
-And a method for it:
-
-    int EditNodeOperation(int op, string what, boolean status)
 
 Example
 
     op = EditNodeOperation(0, 'relations', true)
     op = EditNodeOperation(op, 'title', true)
 
-## Access rights
-There are rights:
-
+### AccessRights
     create access from, create access to, delete, write, relate, read
-
-And a method for it:
-
-    int AccessRights(int rights, string what, boolean status)
 
 Example
 
     rights = AccessRights(0, 'create access from', true)
     rights = AccessRights(rights, 'create access to', true)
+
+# Server Config
+TODO localhost?  
+TODO Server on file storage ?  
+KeyValuePairs - `host=<> port=<>`
