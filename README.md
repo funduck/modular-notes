@@ -12,7 +12,7 @@ ServerAPI separates App from Backend, App must have config for server for it wou
 sequenceDiagram
     User->>App: some action
     App->>Backend: ServerAPI REST request
-    Backend->>App: multipart/form-data response
+    Backend->>App: pure HTTP response
     App->>User: draws something
 ```
 
@@ -27,7 +27,7 @@ sequenceDiagram
     App.ui-->>App.model: ModelAPI
     App.model-->>App.core: CoreAPI
     App.core->>Backend: ServerAPI REST request
-    Backend->>App.core: multipart/form-data response
+    Backend->>App.core: pure HTTP response
     App.core-->>App.model: s
     App.model-->>App.ui: s
     App.ui->>User: draws something
@@ -35,26 +35,30 @@ sequenceDiagram
 
 ## Backend level
 Backend.server - public server - provides authorization, authentication, balancing, caching, and different interfaces: http, https, web socket (+additional functionality?)
-Backend.storage - protected server (local?) - provides only access to data
-Two http servers seems the easiest way to completely separate these two modules.
+Backend.storage - protected server (local?) - provides only access to data with basic indexing.
+Backend.index - protected server - provides additional index for data, especially for **content**
+Http servers seems the easiest way to completely separate these modules.
 ```mermaid
 sequenceDiagram
     App->>Backend.server: ServerAPI REST request
     Backend.server->>Backend.storage: StorageAPI REST request
-    Backend.storage->>Backend.server: multipart/form-data response
-    Backend.server->>App: multipart/form-data response
+    Backend.storage->>Backend.server: pure HTTP response
+    Backend.server->>Backend.index: IndexAPI REST request
+    Backend.index->>Backend.server: pure HTTP response
+    Backend.server->>App: pure HTTP response
 ```
 
 ## APIs
-[StorageAPI](docs/STORAGE_API.md)
-[ServerAPI](docs/SERVER_API.md)
-[CoreAPI](docs/CORE_API.md)
-[ModelAPI](docs/MODEL_API.md)
+[StorageAPI](docs/STORAGE.md)
+[IndexAPI](docs/INDEX.md)
+[ServerAPI](docs/SERVER.md)
+[CoreAPI](docs/CORE.md)
+[ModelAPI](docs/MODEL.md)
 
 ## Profit
 We can choose and develop quite independently any part of chain **ui.model.core.server.storage** in application we'd like to make better.
 We can build different applications changing only **ui + model**.
-We can play with any application setting up locally any **server + storage** we like.
+We can play with any application setting up locally any **server + storage + index** we like.
 We can have different servers for different applications or run all of them on one server or we can have different servers for one application and sync data between them.
 
 # Basic idea of data model
@@ -73,7 +77,7 @@ In case of encryption **title**, **content**, **meta** and all **relations** are
 * string **title** - text
 * string **ctype** - MIME content type?
 * binary **content** - anything
-* int **flags** - some bits?
+* int **flags** - some bits, `...<title is encrypted><content is encrypted>`
 * string **meta** - json string
 * Relation[] **relations**
 
@@ -137,6 +141,7 @@ To change *Access* between *Node_A* and *Node_B* User needs rights 'create acces
 
 ## Questions
 C++ compatible API -
-Full text search -
-Sharding of data -
-Indexing of data -
+Indexing of data - Backend.index
+Full text search - Backend.index
+Content recognition search - Read all, set recognized tags, find by these tags
+Interprocess communication - pipelines?

@@ -1,6 +1,11 @@
-# StorageAPI
-It is REST API for protected internal server providing access to storage without any security checks, only access model is applied.
+# Storage
+It is protected internal server providing access to storage without any security checks, only access model is applied.
+[Get Nodes](#get-nodes)
+[Edit Node](#edit-node)
+[Get Access](#get-access)
+[Edit Access](#edit-access)
 
+# HTTP REST API
 ## Get Nodes
 ### Request
 to get one
@@ -12,11 +17,11 @@ to get multiple or search with paging
     GET /nodes?user=<**user**>
     &<id or idIn>=<**idIn**>&idOut=<**idOut**>&idMin=<**idMin**>&idMax=<**idMax**>
     &classIn=<**classIn**>&classOut=<**classOut**>
-    &titleRegexp=<**titleRegexp**>
-    &contentRegexp=<**contentRegexp**>
+    &titleLike=<**titleLike**>
+    &contentLike=<**contentLike**>
     &relationsIn=<**relationsIn**>&relationsOut=<**relationsOut**>
     &responseFields=<**responseFields**>
-    &sort=<**sort**>&<cursor=<**cursor**>&skip=<**offset**>&limit=<**limit**>
+    &sort=<**sort**>&limit=<**limit**>
 
 Returned will be *Nodes* for which User has access 'read'.
 If **id or idIn** were in request and user doesn't have access to even one *Node* then request fails with error.
@@ -29,22 +34,22 @@ If **id or idIn** were in request and user doesn't have access to even one *Node
 * string **idMax** - maximum *Node* id
 * string **classIn** - comma separated URI encoded *Node* classes
 * string **classOut** - comma separated URI encoded *Node* classes
-* string **titleRegexp** - URI encoded regular expression for *Node* title
-* string **contentRegexp** - URI encoded regular expression for *Node* content, only if *Node* ctype is 'plain/text'
+* string **titleLike** - URI encoded string `<engine>:<expression>`, for regex `regex:^cat .*$`, for full text search `fts:cat `  
+* string **contentLike** - URI encoded string `<engine>:<expression>`, only if *Node* ctype is 'plain/text'
 * string **relationsIn** - comma separated URI encoded `<class1>,<rel1_id>,<rel1_val_min>,<rel1_val_max>,<class2>, ...` length is multiple of 4
 * string **relationsOut** - comma separated URI encoded `<class1>,<rel1_id>,<rel1_val_min>,<rel1_val_max>,<class2>, ...` length is multiple of 4
-* string **responseFields** - comma separated URI encoded *Node* field names
+* string **responseFields** - comma separated URI encoded *Node* field names, **id** always included in response
 * string **sort** - direction of sorting by **id**, 'desc' or 'asc'
-* string **cursor** - paging option *nextCursor* or *prevCursor* from previous request
-* int **offset** - paging option when no cursor is available or for random access
-* int **limit** - paging option when no cursor is available or for random access
+* int **limit**
 
-Paging options **cursor** and **offset** + **limit** are mutually exclusive.
-TODO Regular expression standard must be defined precisely.
+For encrypted *Nodes* options **titleLike** and **contentLike** wont be applied.
+If **titleLike** or **contentLike** use engine not provided by Storage response will contain **warning** field with messages.
+If **titleLike** or **contentLike** is not empty encrypted *Nodes* wont be returned.
+Regex is always POSIX.
 
 ### Response
 Body:
-* multipart/form-data with fields going through **responseFields** for every found *Node*, in the end **nextCursor** and **prevCursor** fields may be returned for paging
+* multipart/form-data with fields going through **responseFields** for every found *Node*, in end adds field **end** to tell if there are more records to read
 * plain/text error message
 
 Codes:
@@ -60,10 +65,15 @@ Request
 
     GET /nodes/2?user=1
 
-    GET /nodes?user=1&classIn=note,image,video&titleRegexp=%20dog&sort=asc&limit=10
+    GET /nodes?user=1&classIn=note,image,video&titleLike=regex%3Adog&contentLike=fts%3Adog&sort=asc&limit=10
 
 Response body:
 
+    --aBoundaryString
+    Content-Disposition: form-data; name="warning"
+    Content-Type: text/plain
+
+    cannot use option "contentLike", no search engine "fts"
     --aBoundaryString
     Content-Disposition: form-data; name="id"
     Content-Type: text/plain
@@ -145,10 +155,10 @@ Response body:
 
     4,"another",1,3,"mammal",1
     --aBoundaryString
-    Content-Disposition: form-data; name="nextCursor"
-    Content-Type: application/x-www-form-urlencoded
+    Content-Disposition: form-data; name="end"
+    Content-Type: text/plain
 
-    idMin=4&classIn=note,image,video&titleRegexp=%20dog&sort=asc&limit=10
+    false
     --aBoundaryString--
 
 
