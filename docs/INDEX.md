@@ -4,7 +4,7 @@ It is REST API for protected internal server providing access to index without a
 # HTTP REST API
 ## Get Nodes
 ### Request
-Exactly same as [StorageAPI Get Nodes](STORAGE.md#get-nodes), but Index uses only some of parameters and ignores others.
+Exactly same as [StorageAPI Get Nodes](STORAGE.md#get-nodes), but Index uses only some of parameters and ignores others.  
 It definitely uses **limit**, **idMin**, **idMax**, **idIn**, **idOut**.
 
 ### Response

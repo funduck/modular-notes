@@ -1,7 +1,7 @@
 # Core
-Client application module providing access to Server.
-*Node* is used as described [here](../README.md#node)
-*Access* is used as described [here](../README.md#access)
+Client application module providing access to Server.  
+*Node* is used as described [here](../README.md#node)  
+*Access* is used as described [here](../README.md#access)  
 
 # API
 Every method returns some kind of object with properties:
@@ -105,8 +105,8 @@ null
 null
 
 # Server Config
-TODO localhost?
-TODO Server on file storage ?
+TODO localhost?  
+TODO Server on file storage ?  
 KeyValuePairs - `host=<> port=<>`
 
 # Bit variables

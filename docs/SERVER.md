@@ -4,23 +4,23 @@
 * https - TODO
 * web socket - TODO
 
-Also Server may include Index and therefore use it when proxying requests to Storage.
+Also Server may include Index and therefore use it when proxying requests to Storage.  
 TODO May be it will have some additional functionality based on StorageAPI?
 
 # HTTP REST API
 ## Access control methods
 ### Authentication
-First and super naive.
+First and super naive.  
 To perform any request Client must provide valid *Access-Token* in header **Cookie** - `Cookie: token=<**Access-Token**>`
 
 ### Authorization
 Client can authorize himself in any request providing header `Authorization: Basic <base64 encoded **user**:**password**>`, in response he will get *Access-Token* in header `Set-Cookie: token=<**Access-Token**> Secure HttpOnly`
-TODO get rid of cookies
+TODO get rid of cookies  
 TODO use OAuth or something
 
 ### Sessions
-Server keeps a list of active sessions by keeping valid *Access-Tokens* for user.
-When *Access-Token* is invalidated session ends.
+Server keeps a list of active sessions by keeping valid *Access-Tokens* for user.  
+When *Access-Token* is invalidated session ends.  
 To get a list of sessions:
 
     GET /sessions?user=<**user**>
@@ -56,7 +56,7 @@ Proxied to Storage
 ### Get Nodes
 If Index present read [this](#on-get-nodes)
 #### Ignored parameters
-Some parameters in request may be ignored, they will return in field **ignoredParameters** in the end of body
+Some parameters in request may be ignored, they will return in field **ignoredParameters** in the end of body  
 Example
     Content-Disposition: form-data; name="ignoredParameters"
     Content-Type: text/plain
@@ -64,7 +64,7 @@ Example
     titleLike,contentLike
 
 #### Cursor
-If Storage says there are more records than returned Server must add response fields **nextCursor** or **prevCursor** or both.
+If Storage says there are more records than returned Server must add response fields **nextCursor** or **prevCursor** or both.  
 They are full query string for next/prev page for request with same filters.
 
 Example
@@ -77,14 +77,14 @@ Example
 In addition to StorageAPI's method there is option to read with offset
 * int **offset**
 
-Server reads from Storage with **limit** = **offset** to find margin *Node* **id** and then reads with original **limit** and modified **idMin** or **idMax** depending on the **sort** option.
+Server reads from Storage with **limit** = **offset** to find margin *Node* **id** and then reads with original **limit** and modified **idMin** or **idMax** depending on the **sort** option.  
 Of course random access is slow and computational heavy, so not recommended to use.
 
 ### Edit Node
 If Index present read [this](#on-edit-node)
 
 # Index
-Of course Storage may have its own indexes, but it should be possible to have external indexing system.
+Of course Storage may have its own indexes, but it should be possible to have external indexing system.  
 [IndexAPI full description and examples](INDEX.md)
 
 ## Server set index
@@ -111,7 +111,7 @@ sequenceDiagram
 ```
 
 ## On Get Nodes
-If Server has Index it modifies requests to Storage, algorithms differ for scanning in asc and desc order.
+If Server has Index it modifies requests to Storage, algorithms differ for scanning in asc and desc order.  
 Tip: using external index for optimal performance Server may first find ids and then request Storage for desired fields.
 
 ### Descending

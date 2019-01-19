@@ -1,8 +1,8 @@
 # Storage
-It is protected internal server providing access to storage without any security checks, only access model is applied.
-[Get Nodes](#get-nodes)
-[Edit Node](#edit-node)
-[Get Access](#get-access)
+It is protected internal server providing access to storage without any security checks, only access model is applied.  
+[Get Nodes](#get-nodes)  
+[Edit Node](#edit-node)  
+[Get Access](#get-access)  
 [Edit Access](#edit-access)
 
 # HTTP REST API
@@ -42,9 +42,9 @@ If **id or idIn** were in request and user doesn't have access to even one *Node
 * string **sort** - direction of sorting by **id**, 'desc' or 'asc'
 * int **limit**
 
-For encrypted *Nodes* options **titleLike** and **contentLike** wont be applied.
-If **titleLike** or **contentLike** use engine not provided by Storage response will contain **warning** field with messages.
-If **titleLike** or **contentLike** is not empty encrypted *Nodes* wont be returned.
+For encrypted *Nodes* options **titleLike** and **contentLike** wont be applied.  
+If **titleLike** or **contentLike** use engine not provided by Storage response will contain **warning** field with messages.  
+If **titleLike** or **contentLike** is not empty encrypted *Nodes* wont be returned.  
 Regex is always POSIX.
 
 ### Response
@@ -166,9 +166,9 @@ Response body:
 ### Request
     POST /node/<**id**>?user=<**user**>&operation=<**operation**>
 
-When *Node* is new, full *Access* will be created for User.
-To modify *Node* User needs access 'write'.
-To modify relations User needs access 'relate'.
+When *Node* is new, full *Access* will be created for User.  
+To modify *Node* User needs access 'write'.  
+To modify relations User needs access 'relate'.  
 *Node* with same **class** + **title** + **ctype** + checksum(**content**) will not be duplicated
 
 #### Parameters
