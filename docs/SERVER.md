@@ -28,7 +28,7 @@ To get a list of sessions:
 Returns list of active sessions in response body multipart/form-data
 
         --aBoundaryString
-        Content-Disposition: form-data; name="session_id"
+        Content-Disposition: form-data; name="sessionId"
         Content-Type: text/plain
 
         2
@@ -55,12 +55,20 @@ Proxied to Storage
 
 ### Get Nodes
 If Index present read [this](#on-get-nodes)
+#### Ignored parameters
+Some parameters in request may be ignored, they will return in field **ignoredParameters** in the end of body
+Example
+    Content-Disposition: form-data; name="ignoredParameters"
+    Content-Type: text/plain
+
+    titleLike,contentLike
+
 #### Cursor
 If Storage says there are more records than returned Server must add response fields **nextCursor** or **prevCursor** or both.
 They are full query string for next/prev page for request with same filters.
 
 Example
-
+    Content-Disposition: form-data; name="nextCursor"
     Content-Type: application/x-www-form-urlencoded
 
     idMin=4&classIn=note,image,video&titleLike=regex%3Adog&sort=asc&limit=10
@@ -79,6 +87,14 @@ If Index present read [this](#on-edit-node)
 Of course Storage may have its own indexes, but it should be possible to have external indexing system.
 [IndexAPI full description and examples](INDEX.md)
 
+## Server set index
+By default index is turned on for all users, but if it is not needed it can be switched off and Server will ignore it.
+
+    POST /user/**user**?index=<**state**>
+
+* int **user**
+* string **state** - 'on' or 'off'
+
 ## Indexing
 When Index is turned on it starts indexing all new created *Nodes* and indexes all user's *Nodes* from the end to beginning. Its important, because it lets to scan all indexed *Nodes* first and be sure that all not indexed have smaller **id**.
 
@@ -96,6 +112,7 @@ sequenceDiagram
 
 ## On Get Nodes
 If Server has Index it modifies requests to Storage, algorithms differ for scanning in asc and desc order.
+Tip: using external index for optimal performance Server may first find ids and then request Storage for desired fields.
 
 ### Descending
 Server reads Index, receives array of **id**, modifies original request and reads *Nodes*. Repeats until **limit** is reached or there are no more records in Index. If more records needed Server continues reading Storage with option **idMax** == last *Node* read from Index.

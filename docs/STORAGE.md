@@ -38,7 +38,7 @@ If **id or idIn** were in request and user doesn't have access to even one *Node
 * string **contentLike** - URI encoded string `<engine>:<expression>`, only if *Node* ctype is 'plain/text'
 * string **relationsIn** - comma separated URI encoded `<class1>,<rel1_id>,<rel1_val_min>,<rel1_val_max>,<class2>, ...` length is multiple of 4
 * string **relationsOut** - comma separated URI encoded `<class1>,<rel1_id>,<rel1_val_min>,<rel1_val_max>,<class2>, ...` length is multiple of 4
-* string **responseFields** - comma separated URI encoded *Node* field names, **id** always included in response
+* string **responseFields** - comma separated URI encoded *Node* field names, **id** is always included in response
 * string **sort** - direction of sorting by **id**, 'desc' or 'asc'
 * int **limit**
 

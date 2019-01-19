@@ -48,12 +48,12 @@ sequenceDiagram
     Backend.server->>App: pure HTTP response
 ```
 
-## APIs
-[StorageAPI](docs/STORAGE.md)
-[IndexAPI](docs/INDEX.md)
-[ServerAPI](docs/SERVER.md)
-[CoreAPI](docs/CORE.md)
-[ModelAPI](docs/MODEL.md)
+## Modules
+[Storage](docs/STORAGE.md)
+[Index](docs/INDEX.md)
+[Server](docs/SERVER.md)
+[Core](docs/CORE.md)
+[Model](docs/MODEL.md)
 
 ## Profit
 We can choose and develop quite independently any part of chain **ui.model.core.server.storage** in application we'd like to make better.
