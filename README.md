@@ -148,7 +148,7 @@ If *Node_A* has direct access to *Node_C*, then only direct rights are applied.
 To change *Access* between *Node_A* and *Node_B* User needs rights 'create access from' *Node_A* and 'create access to' *Node_B*.
 
 ## Questions
-C++ compatible API - TODO
-Indexing of data - Backend.index
-Full text search - Backend.index
-Content recognition search - Read all, set recognized tags, find by these tags
+C++ compatible API - TODO  
+Indexing of data - Backend.index  
+Full text search - Backend.index  
+Content recognition search - Read all, set recognized tags, find by these tags  
