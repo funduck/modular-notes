@@ -2,15 +2,16 @@
   "name": "nodejs_storage",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/*"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "busboy": "^0.2.14",
-    "form-data": "^2.3.3",
-    "toxy": "^0.3.16"
+    "nedb": "^1.8.0"
   }
 }

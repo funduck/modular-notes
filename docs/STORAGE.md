@@ -43,7 +43,7 @@ If **id or idIn** were in request and user doesn't have access to even one *Node
 * int **limit**
 
 For encrypted *Nodes* options **titleLike** and **contentLike** wont be applied.  
-If **titleLike** or **contentLike** use engine not provided by Storage response will contain **warning** field with messages.  
+If **titleLike** or **contentLike** use engine not provided by Storage response will contain **ignoredParameters** field with messages.  
 If **titleLike** or **contentLike** is not empty encrypted *Nodes* wont be returned.  
 Regex is always POSIX.
 
@@ -70,10 +70,10 @@ Request
 Response body:
 
     --aBoundaryString
-    Content-Disposition: form-data; name="warning"
+    Content-Disposition: form-data; name="ignoredParameters"
     Content-Type: text/plain
 
-    cannot use option "contentLike", no search engine "fts"
+    contentLike
     --aBoundaryString
     Content-Disposition: form-data; name="id"
     Content-Type: text/plain
@@ -113,7 +113,7 @@ Response body:
     Content-Disposition: form-data; name="relations"
     Content-Type: text/plain
 
-    4,"dalmatian",1
+    tag,4,"dalmatian",1
     --aBoundaryString
     Content-Disposition: form-data; name="id"
     Content-Type: text/plain
@@ -153,7 +153,7 @@ Response body:
     Content-Disposition: form-data; name="relations"
     Content-Type: text/plain
 
-    4,"another",1,3,"mammal",1
+    tag,4,"another",1,tag,3,"mammal",1
     --aBoundaryString
     Content-Disposition: form-data; name="end"
     Content-Type: text/plain

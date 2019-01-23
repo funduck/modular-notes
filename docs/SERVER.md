@@ -96,7 +96,7 @@ By default index is turned on for all users, but if it is not needed it can be s
 * string **state** - 'on' or 'off'
 
 ## Indexing
-When Index is turned on it starts indexing all new created *Nodes* and indexes all user's *Nodes* from the end to beginning. Its important, because it lets to scan all indexed *Nodes* first and be sure that all not indexed have smaller **id**.
+When Index is turned on it starts indexing all new created *Nodes* and indexes all user's *Nodes* from the end to beginning. It is important, because it lets to scan all indexed *Nodes* first and be sure that all not indexed have smaller **id**. TODO What if User searches for someone's *Nodes*, he may not have index? (Idea: Indexing POST /node/**id**?index=<state> - indexes *Node* and all relatives)
 
 ## On Edit Node
 Server asynchronously updates Index only if Storage responds with success.
