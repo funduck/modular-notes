@@ -1,0 +1,4 @@
+{
+  "operation": ["delete", "title", "content", "flags", "meta", "relations"],
+  "rights": ["read", "relate", "write", "delete", "create_access_to", "create_access_from"]
+}

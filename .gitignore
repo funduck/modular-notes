@@ -1,3 +1,2 @@
 package-lock.json
-nodejs_server/node_modules/*
-nodejs_storage/node_modules/*
+*/nodejs/node_modules/*

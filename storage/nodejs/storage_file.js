@@ -3,7 +3,12 @@
 const assert = require('assert');
 const when = require('when');
 const NeDB = require('nedb');
-const storageAPI = require('./storage_api');
+
+const Messages = require('../../utils/nodejs/messages');
+
+const storageAPI = require('../api');
+const allAccessRights = require('../constants').rights;
+const allOperations = require('../constants').operation;
 /*
 * int **id** - unique serial integer being assigned to *Node* on create
 * int **author** - id of User who created this *Node*
@@ -37,7 +42,7 @@ module.exports = (config) => {
         :
         new NeDB();
 
-    const logger = config && config.logger ? config.logger : require('./console_logger');
+    const logger = config && config.logger ? config.logger : require('../../utils/nodejs/console_logger').get('storage');
 
     let globalId = null;
     const getNextId = () => {
@@ -69,6 +74,7 @@ module.exports = (config) => {
         db.remove({}, {multi: true}, (err, numRemoved) => {
             if (err) return d.reject(err);
             logger.debug('clear() removed:', numRemoved);
+            globalId = null;
             d.resolve(numRemoved);
         });
         return d.promise;
@@ -93,17 +99,16 @@ module.exports = (config) => {
         return d.promise;
     };
 
-    const allAccessRights = ['read', 'relate', 'write', 'delete', 'create_access_to', 'create_access_from'];
     const fullAccess = parseInt(''.padEnd(allAccessRights.length, '1'), 2);
     const accessHas = {};
     for (let i = 0; i < allAccessRights.length; i++) {
         accessHas[allAccessRights[i]] = (val) => (val & Math.pow(2, i)) > 0;
     }
 
-    const calcAccesRights = (idA, nodeA, nodeB) => {
-        logger.debug('calcAccesRights()', 'idA:', idA, 'nodeA:', nodeA, 'nodeB:', nodeB);
+    const calcAccessRights = (idA, nodeA, nodeB) => {
+        //logger.debug('calcAccessRights()', 'idA:', idA, 'nodeA:', nodeA, 'nodeB:', nodeB);
         if (nodeB == null) {
-            logger.debug('nodeB not exists => full rights');
+            // logger.debug('nodeB not exists => full rights');
             return fullAccess;
         }
         // direct rights are above indirect
@@ -129,7 +134,7 @@ module.exports = (config) => {
         .then((nodes) => {
             const nodeA = nodes[0];
             const nodeB = nodes[1];
-            return calcAccesRights(idA, nodeA, nodeB);
+            return calcAccessRights(idA, nodeA, nodeB);
         });
     };
 
@@ -137,8 +142,8 @@ module.exports = (config) => {
         user = JSON.parse(user);
         idA = JSON.parse(idA);
         idB = JSON.parse(idB);
-        logger.verbose('getAccess()');
-        logger.debug('getAccess args:', user, idA, idB, rights);
+        let msg = Messages.new('where', 'getAccess()', 'user', user, 'idA', idA, 'idB', idB);
+        logger.verbose(msg);
         return whan.join(
             getAccessRights(user, idA)
             .then((rights) => {
@@ -155,6 +160,17 @@ module.exports = (config) => {
         )
         .then(() => {
             return getAccessRights(idA, idB);
+        })
+        .tap((res) => {
+            if (msg.get('what')) {
+                logger.info(msg);
+            } else {
+                logger.verbose(msg.set('result', res));
+            }
+        })
+        .catch((e) => {
+            logger.error(msg.set('error', e.message));
+            throw e;
         });
     };
 
@@ -171,8 +187,9 @@ module.exports = (config) => {
         user = JSON.parse(user);
         idA = JSON.parse(idA);
         idB = JSON.parse(idB);
-        logger.verbose('editAccess()');
-        logger.debug('editAccess args:', user, idA, idB, rights);
+        let msg = Messages.new('where', 'editAccess()', 'user', user, 'idA', idA, 'idB', idB);
+        logger.verbose(msg);
+        logger.debug(msg.clone().set('rights', rights));
         return when.join(
             getAccessRights(user, idA)
             .then((rights) => {
@@ -191,34 +208,52 @@ module.exports = (config) => {
             const d = when.defer();
             const set = {};
             set['accessRightsById.' + idA] = rights;
-            db.update({
+            const filter = {
                 id: idB
-            }, {
+            };
+            const update = {
                 $set: set
-            }, (err, numAffected) => {
+            };
+            logger.debug(msg.clone().set('what', 'db.update()').set('filter', filter).set('update', update));
+            db.update(filter, update, (err, numAffected) => {
                 if (err) return d.reject(err);
-                logger.debug('editAccess result:', numAffected);
                 if (numAffected == 0) return d.reject('Node ' + idB + ' not found');
                 d.resolve(numAffected);
             });
             return d.promise;
-        });
+        })
+        .tap((res) => {
+            if (msg.get('what')) {
+                logger.info(msg);
+            } else {
+                logger.verbose(msg.set('result', res));
+            }
+        })
+        .catch((e) => {
+            logger.error(msg.set('error', e.message));
+            throw e;
+        });;
     };
 
-    const allOperations = ['delete', 'title', 'content', 'flags', 'meta', 'relations'];
     const operationIs = {};
+    let _create = 0;
+    // first operation is 'delete', all other are positive, so 'create' is sum of positives
+    _create--;
     for (let i = 0; i < allOperations.length; i++) {
         operationIs[allOperations[i]] = (val) => (val & Math.pow(2, i)) > 0;
+        _create += Math.pow(2, i);
     }
-    operationIs.create = (val) => (val & 62) == 62;
+    operationIs.create = (val) => (val & _create) == _create;
 
     // @return {number} id
     storage.editNode = (
         id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm
     ) => {
-        logger.verbose('editNode()');
+        let msg = Messages.new('where', 'editNode()', 'user', user, 'id', id);
+        logger.verbose(msg);
+
         logger.debug(
-            'editNode() args:', id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm
+            msg.clone().set('args', [id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm])
         );
         return when().then(() => {
             // TODO more checks
@@ -226,15 +261,16 @@ module.exports = (config) => {
                 return getNextId()
                 .then((_id) => {
                     user = _id;
-                    logger.info('new User:', user, title);
                     id = user;
+                    msg.set('user', user);
+                    msg.set('id', id);
                 });
             }
             if (id == null && user != null && klass != 'user' && klass != null && operationIs.create(operation)) {
                 return getNextId()
                 .then((_id) => {
                     id = _id;
-                    logger.info('new Node:', id);
+                    msg.set('id', id);
                 });
             }
         })
@@ -246,19 +282,22 @@ module.exports = (config) => {
             return getAccessRights(user, id);
         })
         .then((rights) => {
-            logger.verbose('getAccessRights()', 'user:', user, 'node id:', id, 'rights:', rights);
+            logger.debug(msg.clone().set('what', 'getAccessRights()').set('result', rights));
             const set = {};
             const unset = {};
             let upsert = false;
             const relIds = [];
 
             if (operationIs.delete(operation)) {
+                msg.set('what', 'deleted node');
                 assert(accessHas.delete(rights), 'user has no right to delete ' + id);
                 const d = when.defer();
                 db.remove({id: id}, (err, numAffected) => {
-                    logger.debug('editNode() result:', err, numAffected);
-                    if (err) d.reject(err);
-                    else d.resolve(numAffected);
+                    if (err) {
+                        d.reject(err);
+                    } else {
+                        d.resolve(id);
+                    }
                 });
                 return d.promise;
             }
@@ -291,6 +330,7 @@ module.exports = (config) => {
                 assert(relationsAdd != null || relationsRm != null, '"relations" cannot be null');
                 relationsAdd = relationsAdd ? relationsAdd.split(',') : [];
                 if (relationsAdd && relationsAdd.length > 0) {
+                    msg.set('relationsAdd', relationsAdd.length/3);
                     for (let i = 0; i < relationsAdd.length / 3; i++) {
                         const rId = JSON.parse(relationsAdd[3*i + 0]);
                         const rTitle = decodeURIComponent(relationsAdd[3*i + 1]);
@@ -306,6 +346,7 @@ module.exports = (config) => {
                 }
                 relationsRm = relationsRm ? relationsRm.split(',') : [];
                 if (relationsRm && relationsRm.length > 0) {
+                    msg.set('relationsRm', relationsRm.length);
                     for (let i = 0; i < relationsRm.length; i++) {
                         const rId = JSON.parse(relationsRm[i]);
                         assert.equal(typeof rId, 'number', '"relation" id must be number');
@@ -316,6 +357,7 @@ module.exports = (config) => {
                 }
             }
             if (operationIs.create(operation)) {
+                msg.set('what', 'created node', id);
                 assert(klass != null, '"class" cannot be null');
                 assert.equal(typeof klass, 'string', 'typeof "class" must be string');
                 set.author = user;
@@ -336,9 +378,9 @@ module.exports = (config) => {
                             const node = nodes[i];
                             assert(node != null, 'relation ' + relIds[i] + ' not found');
                             if (!hasUserRightOnNode(user, userNode, node, 'relate')) {
-                                throw new Error('user ' + user + ' cant relate to ' + node.id);
+                                throw new Error('user ' + user + ' cant relate to node ' + node.id);
                             }
-                            // setting "klass" for easier search
+                            // setting "class" for easier search
                             if (relationsAdd && i < relationsAdd.length / 3) {
                                 set['relationsByType.' + node.class +'.' + node.id] = true;
                                 set['relations.' + node.id].class = node.class;
@@ -350,22 +392,37 @@ module.exports = (config) => {
                 }
             })
             .then(() => {
-                logger.debug('set:', set);
-                logger.debug('unset:', unset);
+                const filter = {id: id};
+                const update = {$set: set, $unset: unset};
+                const opts = {upsert: upsert};
+                logger.debug(msg.clone().set('what', 'db.update()').set('filter', filter).set('update', update).set('options', opts));
                 const d = when.defer();
-                db.update({id: id}, {$set: set, $unset: unset}, {upsert: upsert}, (err, numAffected) => {
-                    logger.debug('editNode() result:', err, numAffected);
-                    if (err) return d.reject(err);
-                    if (numAffected == 0) return d.reject('Node not found');
+                db.update(filter, update, opts, (err, numAffected) => {
+                    if (err) {
+                        return d.reject(err);
+                    }
+                    if (numAffected == 0) {
+                        return d.reject(new Error('Node not found'));
+                    }
                     d.resolve(id);
                 });
                 return d.promise;
             });
+        })
+        .tap((res) => {
+            if (msg.get('what')) {
+                logger.info(msg);
+            } else {
+                logger.verbose(msg.set('result', res));
+            }
+        })
+        .catch((e) => {
+            logger.error(msg.set('error', e.message));
+            throw e;
         });
     };
 
     const addToFilterAccessByUser = (filter, user, userNode) => {
-        logger.debug('addToFilterAccessByUser()', filter, user, userNode);
         // find Nodes with any kind of access from user, then filter out those without read access
         const rIds = Object.keys(userNode.relations || {});
         rIds.push(user);
@@ -378,7 +435,7 @@ module.exports = (config) => {
     };
 
     const hasUserRightOnNode = (user, userNode, node, rightName) => {
-        return accessHas[rightName](calcAccesRights(user, userNode, node));
+        return accessHas[rightName](calcAccessRights(user, userNode, node));
     };
 
     const makeRelationsFilter = (relationsFilter) => {
@@ -415,10 +472,11 @@ module.exports = (config) => {
     ) => {
         // TODO check args
         user = JSON.parse(user);
-        logger.verbose('getNodes()');
+        let msg = Messages.new('where', 'getNodes()', 'user', user);
+        logger.verbose(msg);
         logger.debug(
-            'getNodes() args:', user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
-                relationsIn, relationsOut, responseFields, sort, limit
+            msg.clone().set('args', [user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
+                relationsIn, relationsOut, responseFields, sort, limit])
         );
         return getNodes([user])
         .then((nodes) => {
@@ -427,6 +485,7 @@ module.exports = (config) => {
             const filter = {};
             const userNode = nodes[0];
             addToFilterAccessByUser(filter, user, userNode);
+            logger.debug(msg.clone().set('what', 'addToFilterAccessByUser()').set('result', filter));
             try {
                 if (idIn || idOut || idMin || idMax) {
                     filter.id = {};
@@ -487,7 +546,7 @@ module.exports = (config) => {
                 return when.reject(e);
             }
             const d = when.defer();
-            logger.debug('db.find()', JSON.stringify(filter, null, '  '));
+            logger.debug(msg.clone().set('what', 'db.find()').set('filter', filter));
             db.find(filter, projection, (err, docs) => {
                 if (err) return d.reject(err);
                 const res = [];
@@ -512,10 +571,20 @@ module.exports = (config) => {
                 if (ignoredParameters.length > 0) {
                     res.push({ignoredParameters: ignoredParameters.join(',')});
                 }
-                logger.debug('getNodes() result:', err, res);
                 d.resolve(res);
             });
             return d.promise;
+        })
+        .tap((res) => {
+            if (msg.get('what')) {
+                logger.verbose(msg);
+            } else {
+                logger.debug(msg.set('result', res));
+            }
+        })
+        .catch((e) => {
+            logger.error(msg.set('error', e.message));
+            throw e;
         });
     };
 

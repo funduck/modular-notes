@@ -1,0 +1,95 @@
+{
+  "title": "not get node without access",
+  "steps": [
+    {
+      "title": "create user Joe",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "create user Bill",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Bill",
+        "ctype": "text/plain",
+        "content": "Bill Delatour Dauterive",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "insert Bill's node",
+      "method": "editNode",
+      "params": {
+        "user": 2,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "Hello world, I'm Bill",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "get node by Bill",
+      "method": "getNodes",
+      "params": {
+        "user": "2",
+        "responseFields": "",
+        "classIn": "note"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+            "id": 3
+          }
+        }
+      }
+    },{
+      "title": "not get node by Joe",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "idIn": "3"
+      },
+      "result": {
+        "length": 0
+      }
+    }
+  ]
+}

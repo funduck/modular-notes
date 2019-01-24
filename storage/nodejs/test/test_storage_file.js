@@ -1,17 +1,17 @@
 'use strict';
 
 const assert = require('assert');
-const storageAPI = require('../storage_api');
+const storageAPI = require('../../api');
 
-require('../console_logger').setLevel('debug');
+// require('../../../utils/nodejs/console_logger').get('storage').setLevel('debug');
 
 let storage;
 
 const fs = require('fs');
-const dataFiles = fs.readdirSync(__dirname + '/data/storage_file');
+const dataFiles = fs.readdirSync(__dirname + '/../../test/scenarios');
 const scenarios = [];
 for (const i in dataFiles) {
-    scenarios.push(require('./data/storage_file/' + dataFiles[i]));
+    scenarios.push(require('../../test/scenarios/' + dataFiles[i]));
 }
 
 describe('File based storage', function() {

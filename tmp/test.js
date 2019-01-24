@@ -1,5 +1,5 @@
-module.exports = {
-    title: 'create node & get node',
+console.log(JSON.stringify({
+    title: 'create and get node',
     steps: [{
         title: 'create user`',
         method: 'editNode',
@@ -67,4 +67,5 @@ module.exports = {
             }
         }
     }]
-};
+}, null, '  ')
+)
