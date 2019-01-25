@@ -1,9 +1,10 @@
 'use strict';
+
 /*
-Object keeping key-value pairs
-has toString() so can be used for logging
-has clone() so can be nested in subroutines
-can be used as "context" since keys starting with "_" are not stringified in toString()
+    Keeps key-value pairs
+    has toString() so can be used for logging
+    has clone() so can be nested in subroutines
+    can be used as "context" since keys starting with "_" are not stringified in toString()
 */
 class Message extends Map {
     constructor (...args) {
@@ -21,10 +22,30 @@ class Message extends Map {
 
         // message universal id
         if (!this.get('muid')) {
-            this.set('muid', Messages.getNextMUID());
+            this.set('muid', Messages._getNextMUID());
         }
     }
 
+    /*
+    Set multiple key-value pairs, for example: setm('a', 1, 'b', 2, 'c', 3)
+    */
+    setm (...args) {
+        if (args.length == 0) return this;
+
+        if (args.length % 2 == 0) {
+            for (let i = 0; i < args.length/2; i++) {
+                this.set(args[2*i], args[2*i + 1]);
+            }
+        } else {
+            throw new Error('number of arguments must be multiple of 2')
+        }
+
+        return this;
+    }
+
+    /*
+    @return {string} made using all keys except starting with "_", uses Messages._format
+    */
     toString () {
         let key;
         let val;
@@ -35,7 +56,7 @@ class Message extends Map {
         const fields = Messages._format.fields;
         for (let i = 0; i < fields.length; i++) {
             key = fields[i].field;
-            val = this.get(key) || '';
+            val = String(this.get(key) || '');
             if (Messages._format.elastic) {
                 len = fields[i].len;
                 if (val.length < len) {
@@ -59,6 +80,7 @@ class Message extends Map {
         }
         for (let [key, val] of this) {
             if (!key.match(/^_/) && // keys like "_somePrivate" wont be serialized
+                key != 'muid' &&
                 !Messages._format.keys.get(key) &&
                 val != null &&
                 val != undefined
@@ -69,24 +91,10 @@ class Message extends Map {
         return s;
     }
 
-    setm (...args) {
-        if (args.length == 0) return this;
-
-        if (args.length % 2 == 0) {
-            for (let i = 0; i < args.length/2; i++) {
-                this.set(args[2*i], args[2*i + 1]);
-            }
-        } else {
-            throw new Error('number of arguments must be multiple of 2')
-        }
-
-        return this;
-    }
-
     clone (...args) {
         const clone = new Message(this);
         if (args.length > 0) {
-            this.setm(...args);
+            clone.setm(...args);
         }
         return clone;
     };
@@ -95,7 +103,7 @@ class Message extends Map {
 const Messages = {
     Message: Message,
 
-    getNextMUID: () => {
+    _getNextMUID: function () {
         return  'muid' + new Date().getTime() % 1000000;
     },
 
@@ -111,11 +119,9 @@ const Messages = {
         elastic: true
     },
 
-    new: (...args) => {
-        return new Message(...args);
-    },
+    // TODO if needed _hiddenFields: new Map(),
 
-    setFormat: (format) => {
+    setFormat: function (format) {
         const _f = {
             fields: format.fields,
             keys: new Map(),
@@ -125,7 +131,18 @@ const Messages = {
             _f.keys.set(format.fields[i].field, true);
         }
         Messages._format = _f;
+    },
+
+    /*
+    TODO if needed 
+    hide: function (fields) {
+
+    },
+
+    show: function (fields) {
+
     }
+    */
 };
 
 // setting default format
@@ -140,7 +157,6 @@ Messages.setFormat({
         field: 'what',
         len: 23
     }],
-    hidden: [], // TODO for hidden fields
     elastic: true
 });
 
