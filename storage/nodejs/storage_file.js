@@ -5,6 +5,7 @@ const when = require('when');
 const NeDB = require('nedb');
 
 const Messages = require('../../utils/nodejs/messages');
+const Message = Messages.Message;
 
 const storageAPI = require('../api');
 const allAccessRights = require('../constants').rights;
@@ -45,15 +46,21 @@ module.exports = (config) => {
     const logger = config && config.logger ? config.logger : require('../../utils/nodejs/console_logger').get('storage');
 
     let globalId = null;
-    const getNextId = () => {
+    const getNextId = function () {
         const d = when.defer();
         const filter = globalId ? { _id: globalId } : { what: 'globalId' };
-        db.update(filter, {
+        const update = {
             $inc: {value: 1}
-        }, {
+        };
+        const opts = {
             upsert: true,
             returnUpdatedDocs: true
-        }, (err, num, doc, upsert) => {
+        };
+        // It is useful to pass Message as 'this'
+        if (this instanceof Message) {
+            logger.debug(this.clone('what', 'db.update()', 'filter', filter, 'update', update, 'options', opts));
+        }
+        db.update(filter, update, opts, (err, num, doc, upsert) => {
             // console.log(err, num, doc);
             if (err || num == 0) {
                 return d.reject(err || new Error('failed to upsert globalId'));
@@ -69,22 +76,30 @@ module.exports = (config) => {
 
     const storage = Object.assign({}, storageAPI);
 
-    storage.clear = () => {
+    storage.clear = function () {
         const d = when.defer();
-        db.remove({}, {multi: true}, (err, numRemoved) => {
+        const filter = {};
+        const opts = {multi: true};
+        // if 'this' is not Message it equals new Message()
+        logger.debug(new Message(this).setm('what', 'db.remove()', 'filter', {}, 'options', opts));
+
+        db.remove(filter, opts, (err, numRemoved) => {
             if (err) return d.reject(err);
-            logger.debug('clear() removed:', numRemoved);
             globalId = null;
             d.resolve(numRemoved);
         });
         return d.promise;
     };
 
-    const getNodes = (ids) => {
+    const getNodes = function (ids) {
         const d = when.defer();
-        db.find({
+        const filter = {
             id: {$in: ids}
-        }, (err, docs) => {
+        };
+        if (this instanceof Message) {
+            logger.debug(this.clone('what', 'db.find()', 'filter', {}));
+        }
+        db.find(filter, (err, docs) => {
             if (err) return d.reject(err);
             const order = new Map();
             const res = new Array(ids.length);
@@ -105,8 +120,10 @@ module.exports = (config) => {
         accessHas[allAccessRights[i]] = (val) => (val & Math.pow(2, i)) > 0;
     }
 
-    const calcAccessRights = (idA, nodeA, nodeB) => {
-        //logger.debug('calcAccessRights()', 'idA:', idA, 'nodeA:', nodeA, 'nodeB:', nodeB);
+    const calcAccessRights = function (idA, nodeA, nodeB) {
+        if (this instanceof Message) {
+            logger.debug(this.clone('what', 'calcAccessRights()', 'idA', idA, 'nodeA', nodeA, 'nodeB', nodeB));
+        }
         if (nodeB == null) {
             // logger.debug('nodeB not exists => full rights');
             return fullAccess;
@@ -125,7 +142,10 @@ module.exports = (config) => {
         return rights;
     };
 
-    const getAccessRights = (idA, idB) => {
+    const getAccessRights = function (idA, idB) {
+        if (this instanceof Message) {
+            logger.debug(this.clone('what', 'getAccessRights()', 'idA', idA, 'idB', idB));
+        }
         // Node has full access to itself
         if (idA == idB) {
             return when.resolve(fullAccess);
@@ -142,10 +162,10 @@ module.exports = (config) => {
         user = JSON.parse(user);
         idA = JSON.parse(idA);
         idB = JSON.parse(idB);
-        let msg = Messages.new('where', 'getAccess()', 'user', user, 'idA', idA, 'idB', idB);
-        logger.verbose(msg);
+        let msg = new Message('where', 'getAccess()', 'user', user);
+        logger.verbose(msg.clone('idA', idA, 'idB', idB));
         return whan.join(
-            getAccessRights(user, idA)
+            getAccessRights.call(msg, user, idA)
             .then((rights) => {
                 if (!accessHas.create_access_from(rights)) {
                     throw new Error('user has no right to see access from ' + idA);
@@ -187,17 +207,17 @@ module.exports = (config) => {
         user = JSON.parse(user);
         idA = JSON.parse(idA);
         idB = JSON.parse(idB);
-        let msg = Messages.new('where', 'editAccess()', 'user', user, 'idA', idA, 'idB', idB);
+        let msg = new Message('where', 'editAccess()', 'user', user);
         logger.verbose(msg);
-        logger.debug(msg.clone().set('rights', rights));
+        logger.debug(msg.clone('idA', idA, 'idB', idB, 'rights', rights));
         return when.join(
-            getAccessRights(user, idA)
+            getAccessRights.call(msg, user, idA)
             .then((rights) => {
                 if (!accessHas.create_access_from(rights)) {
                     throw new Error('user has no right to create access from ' + idA);
                 }
             }),
-            getAccessRights(user, idB)
+            getAccessRights.call(msg, user, idB)
             .then((rights) => {
                 if (!accessHas.create_access_to(rights)) {
                     throw new Error('user has no right to create access to ' + idB);
@@ -214,7 +234,7 @@ module.exports = (config) => {
             const update = {
                 $set: set
             };
-            logger.debug(msg.clone().set('what', 'db.update()').set('filter', filter).set('update', update));
+            logger.debug(msg.clone('what', 'db.update()', 'filter', filter, 'update', update));
             db.update(filter, update, (err, numAffected) => {
                 if (err) return d.reject(err);
                 if (numAffected == 0) return d.reject('Node ' + idB + ' not found');
@@ -232,7 +252,7 @@ module.exports = (config) => {
         .catch((e) => {
             logger.error(msg.set('error', e.message));
             throw e;
-        });;
+        });
     };
 
     const operationIs = {};
@@ -249,16 +269,16 @@ module.exports = (config) => {
     storage.editNode = (
         id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm
     ) => {
-        let msg = Messages.new('where', 'editNode()', 'user', user, 'id', id);
+        let msg = new Message('where', 'editNode()', 'user', user, 'id', id);
         logger.verbose(msg);
 
         logger.debug(
-            msg.clone().set('args', [id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm])
+            msg.clone('args', [id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm])
         );
         return when().then(() => {
             // TODO more checks
             if (id == null && user == null && klass == 'user' && operationIs.create(operation)) {
-                return getNextId()
+                return getNextId.call(msg)
                 .then((_id) => {
                     user = _id;
                     id = user;
@@ -267,7 +287,7 @@ module.exports = (config) => {
                 });
             }
             if (id == null && user != null && klass != 'user' && klass != null && operationIs.create(operation)) {
-                return getNextId()
+                return getNextId.call(msg)
                 .then((_id) => {
                     id = _id;
                     msg.set('id', id);
@@ -279,17 +299,17 @@ module.exports = (config) => {
             assert(id != null, 'node "id" cannot be null');
             assert(operation != null, '"operation" cannot be null');
             user = JSON.parse(user);
-            return getAccessRights(user, id);
+            return getAccessRights.call(msg, user, id);
         })
         .then((rights) => {
-            logger.debug(msg.clone().set('what', 'getAccessRights()').set('result', rights));
+            logger.debug(msg.clone('what', 'getAccessRights()', 'result', rights));
             const set = {};
             const unset = {};
             let upsert = false;
             const relIds = [];
 
             if (operationIs.delete(operation)) {
-                msg.set('what', 'deleted node');
+                msg.set('what', 'delete node');
                 assert(accessHas.delete(rights), 'user has no right to delete ' + id);
                 const d = when.defer();
                 db.remove({id: id}, (err, numAffected) => {
@@ -357,7 +377,7 @@ module.exports = (config) => {
                 }
             }
             if (operationIs.create(operation)) {
-                msg.set('what', 'created node', id);
+                msg.set('what', 'create node', id);
                 assert(klass != null, '"class" cannot be null');
                 assert.equal(typeof klass, 'string', 'typeof "class" must be string');
                 set.author = user;
@@ -371,7 +391,7 @@ module.exports = (config) => {
             .then(() => {
                 // check that user can 'relate' to nodes
                 if (relIds.length > 0) {
-                    return getNodes(relIds.concat(user))
+                    return getNodes.call(msg, relIds.concat(user))
                     .then((nodes) => {
                         const userNode = nodes.pop();
                         for (let i = 0; i < nodes.length; i++) {
@@ -395,7 +415,7 @@ module.exports = (config) => {
                 const filter = {id: id};
                 const update = {$set: set, $unset: unset};
                 const opts = {upsert: upsert};
-                logger.debug(msg.clone().set('what', 'db.update()').set('filter', filter).set('update', update).set('options', opts));
+                logger.debug(msg.clone('what', 'db.update()', 'filter', filter, 'update', update, 'options', opts));
                 const d = when.defer();
                 db.update(filter, update, opts, (err, numAffected) => {
                     if (err) {
@@ -475,17 +495,17 @@ module.exports = (config) => {
         let msg = Messages.new('where', 'getNodes()', 'user', user);
         logger.verbose(msg);
         logger.debug(
-            msg.clone().set('args', [user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
+            msg.clone('args', [user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
                 relationsIn, relationsOut, responseFields, sort, limit])
         );
-        return getNodes([user])
+        return getNodes.call(msg, [user])
         .then((nodes) => {
             const ignoredParameters = [];
             const projection = {id: 1, accessRightsById: 1, _id: 0};
             const filter = {};
             const userNode = nodes[0];
             addToFilterAccessByUser(filter, user, userNode);
-            logger.debug(msg.clone().set('what', 'addToFilterAccessByUser()').set('result', filter));
+            logger.debug(msg.clone('what', 'addToFilterAccessByUser()').set('result', filter));
             try {
                 if (idIn || idOut || idMin || idMax) {
                     filter.id = {};
@@ -546,7 +566,7 @@ module.exports = (config) => {
                 return when.reject(e);
             }
             const d = when.defer();
-            logger.debug(msg.clone().set('what', 'db.find()').set('filter', filter));
+            logger.debug(msg.clone('what', 'db.find()', 'filter', filter));
             db.find(filter, projection, (err, docs) => {
                 if (err) return d.reject(err);
                 const res = [];
