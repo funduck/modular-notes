@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "lru-cache": "^5.1.1",
     "nedb": "^1.8.0"
   }
 }

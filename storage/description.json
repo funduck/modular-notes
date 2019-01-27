@@ -1,14 +1,17 @@
 {
+  "storageMethods": {
     "editNode": [
         "id", "user", "operation", "class", "title", "ctype", "content", "flags", "meta", "relationsAdd", "relationsRm"
     ],
-
     "getNodes": ["user", "idIn", "idOut", "idMin", "idMax", "classIn", "classOut", "titleLike", "contentLike",
         "relationsIn", "relationsOut", "responseFields", "sort", "limit"],
-
     "editAccess": [
         "user", "idA", "idB", "rights"
     ],
-
     "getAccess": ["user", "idA", "idB"]
+  },
+  "storageConstants": {
+    "operations": ["delete", "title", "content", "flags", "meta", "relations"],
+    "rights": ["read", "relate", "write", "delete", "create_access_to", "create_access_from"]
+  }
 }

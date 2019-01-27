@@ -1,0 +1,187 @@
+{
+  "title": "create user",
+  "steps": [
+    {
+      "title": "fail create user if 'class'!='user'",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "not user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail create user if 'operation'!=62",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 32,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail create user without title",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": null,
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail create user without ctype",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": null,
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail create user without content",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": null,
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail create user without flags",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": null,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail create user without meta",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": null,
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "create user",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "not create same user twice",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    }
+  ]
+}

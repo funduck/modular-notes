@@ -1,0 +1,131 @@
+{
+  "title": "edit node fields",
+  "steps": [
+    {
+      "title": "create user",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "insert test node",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "hello world",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "edit title and content only",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "class": "notnote",
+        "operation": 6,
+        "title": "new title",
+        "ctype": "text/plain",
+        "content": "new content",
+        "flags": 1,
+        "meta": "{invalid}",
+        "relationsAdd": "invalid",
+        "relationsRm": "invalid"
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "get node",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "2",
+        "responseFields": "id,class,title,content,flags"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+            "id": 2,
+            "class": "note",
+            "title": "new title",
+            "content": "new content",
+            "flags": 0
+          }
+        }
+      }
+    },
+    {
+      "title": "edit flags and meta only",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "class": "notnote",
+        "operation": 24,
+        "title": "new title",
+        "ctype": "text/plain",
+        "content": "new content",
+        "flags": 1,
+        "meta": "{\"c\": 1}",
+        "relationsAdd": "invalid",
+        "relationsRm": "invalid"
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "get node",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "2",
+        "responseFields": "id,title,content,flags,meta"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+            "id": 2,
+            "title": "new title",
+            "content": "new content",
+            "flags": 1,
+            "meta": "{\"c\": 1}"
+          }
+        }
+      }
+    }
+  ]
+}

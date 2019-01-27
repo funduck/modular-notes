@@ -1,0 +1,188 @@
+{
+  "title": "fail edit node(content) with invalid parameters",
+  "steps": [
+    {
+      "title": "create user Joe",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "insert Joe's node",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "Hello world, I'm Joe",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "fail without user",
+      "method": "editNode",
+      "params": {
+        "id": 2,
+        "operation": 4,
+        "ctype": "text/plain",
+        "content": "other text"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail without node id",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "operation": 4,
+        "ctype": "text/plain",
+        "content": "other text"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail without operation",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "ctype": "text/plain",
+        "content": "other text"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail without ctype",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 4,
+        "content": "other text"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail without content",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 4,
+        "ctype": "text/plain"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "success if all parameters present",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 4,
+        "ctype": "text/plain",
+        "content": "other text"
+      },
+      "result": {
+        "value": 2,
+        "error": false
+      }
+    },
+    {
+      "title": "fail edit title without title",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 2
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail edit flags without flags",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 8
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail edit meta without meta",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 16
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail edit meta with invalid json",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 16,
+        "meta": "{I am invalid}"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "fail edit relations without relations",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 32
+      },
+      "result": {
+        "error": true
+      }
+    }
+  ]
+}

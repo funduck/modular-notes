@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const storageAPI = require('../../api');
+const storageMethods = require('../../description').storageMethods;
 
 // require('../../../utils/nodejs/console_logger').get('storage').setLevel('debug');
 
@@ -42,17 +42,17 @@ describe('File based storage', function() {
                 it('step: ' + step.title, (done) => {
                     let failed;
                     const ar = [];
-                    for (let p = 0; p < storageAPI[step.method].length; p++) {
-                        ar.push(step.params[storageAPI[step.method][p]]);
+                    for (let p = 0; p < storageMethods[step.method].length; p++) {
+                        ar.push(step.params[storageMethods[step.method][p]]);
                     }
 
                     storage[step.method](...ar)
                     .then((res) => {
                         if (step.result.value != null) {
-                            assert.equal(res, step.result.value , 'other value expected');
+                            assert.equal(res, step.result.value);
                         }
                         if (step.result.length != null) {
-                            assert.equal(res.length, step.result.length, 'num of results');
+                            assert.equal(res.length, step.result.length);
                         }
                         if (step.result.checkArray != null) {
                             for (const k in step.result.checkArray) {

@@ -1,0 +1,307 @@
+{
+  "title": "create indirect access",
+  "steps": [
+    {
+      "title": "create user Joe",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "create node A",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "A",
+        "ctype": "text/plain",
+        "content": "A",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "create node C",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "C",
+        "ctype": "text/plain",
+        "content": "C",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "checks there is no access A -> C",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": false,
+        "value": 0
+      }
+    },
+    {
+      "title": "create node B1",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "B1",
+        "ctype": "text/plain",
+        "content": "B1",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 4
+      }
+    },
+    {
+      "title": "add relation A -> B1",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 32,
+        "relationsAdd": "4,B1,"
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "create node B2",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "B2",
+        "ctype": "text/plain",
+        "content": "B2",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 5
+      }
+    },
+    {
+      "title": "add relation A -> B2",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 32,
+        "relationsAdd": "5,B2,"
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "give 'write' access B1 -> C",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 4,
+        "idB": 3,
+        "rights": 4
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "checks there is 'write' access A -> C, meaning chain 'A-relation->B1-access->C' provides access",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": false,
+        "value": 4
+      }
+    },
+    {
+      "title": "give 'read' access B2 -> C",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 5,
+        "idB": 3,
+        "rights": 1
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "checks there is 'read/write' access A -> C, meaning indirect accesses 'A-relation->B1-access->C' & 'A-relation->B2-access->C' summarize",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": false,
+        "value": 5
+      }
+    },
+    {
+      "title": "create node B3 with relation B3 -> C",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "B3",
+        "ctype": "text/plain",
+        "content": "B3",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "3,C,",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 6
+      }
+    },
+    {
+      "title": "give 'delete' access A -> B3",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 6,
+        "rights": 8
+      },
+      "result": {
+        "error": false,
+        "value": 6
+      }
+    },
+    {
+      "title": "checks there is still 'read/write' access A -> C, meaning chain 'A-access->B3-relation->C' doesn't provide access",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": false,
+        "value": 5
+      }
+    },
+    {
+      "title": "set 'write' access B2 -> C",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 5,
+        "idB": 3,
+        "rights": 4
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "checks there is 'write' access A -> C, meaning acceses summarize correctly",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": false,
+        "value": 4
+      }
+    },
+    {
+      "title": "set 'read' access A -> C",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3,
+        "rights": 1
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "checks there is 'read' access A -> C, meaning direct access is main",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    }
+  ]
+}

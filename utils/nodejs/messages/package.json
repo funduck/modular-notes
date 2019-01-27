@@ -1,0 +1,29 @@
+{
+  "name": "nodejs-messages",
+  "version": "1.0.0",
+  "description": "messages keep data for logging and apply formatting in toString",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js",
+    "bench": "node bench.js 1> /dev/null"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/funduck/nodejs-messages.git"
+  },
+  "keywords": [
+    "logging",
+    "formatting",
+    "context"
+  ],
+  "author": "funduck",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/funduck/nodejs-messages/issues"
+  },
+  "homepage": "https://github.com/funduck/nodejs-messages#readme",
+  "devDependencies": {
+    "benchmark": "^2.1.4",
+    "mocha": "^5.2.0"
+  }
+}

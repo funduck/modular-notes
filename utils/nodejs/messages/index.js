@@ -24,6 +24,10 @@ class Message extends Map {
         if (!this.get('muid')) {
             this.set('muid', Messages._getNextMUID());
         }
+
+        if (Messages._rmuid && !this.get('rmuid')) {
+            this.set('rmuid', Messages._getNextRMUID());
+        }
     }
 
     /*
@@ -79,8 +83,9 @@ class Message extends Map {
             s += ''.padEnd(free, ' ');
         }
         for (let [key, val] of this) {
-            if (!key.match(/^_/) && // keys like "_somePrivate" wont be serialized
-                key != 'muid' &&
+            if ((!key.match || !key.match(/^_/)) && // keys like "_somePrivate" wont be serialized
+                key != 'muid' && // muid is positional
+                key != 'rmuid' && // rmuid is positional
                 !Messages._format.keys.get(key) &&
                 val != null &&
                 val != undefined
@@ -103,8 +108,14 @@ class Message extends Map {
 const Messages = {
     Message: Message,
 
+    _rmuid: false,
+
     _getNextMUID: function () {
         return  'muid' + new Date().getTime() % 1000000;
+    },
+
+    _getNextRMUID: function () {
+        return  'rmuid' + new Date().getTime();
     },
 
     _format: {
@@ -129,12 +140,23 @@ const Messages = {
         };
         for (let i = 0; i < format.fields.length; i++) {
             _f.keys.set(format.fields[i].field, true);
+            if (format.fields[i].field == 'muid' && (format.fields[i].len || 0) < 12) {
+                format.fields[i].len = 12;
+            }
+            if (format.fields[i].len == null) {
+                format.fields[i].len = 10;
+            }
         }
         Messages._format = _f;
+
+        Messages._rmuid = false;
+        if (Messages._format.keys.get('rmuid')) {
+            Messages._rmuid = true;
+        }
     },
 
     /*
-    TODO if needed 
+    TODO if needed
     hide: function (fields) {
 
     },

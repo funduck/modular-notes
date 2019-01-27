@@ -1,0 +1,150 @@
+{
+  "title": "create node with relation",
+  "steps": [
+    {
+      "title": "create user",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "create node A",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "A",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "create node B with relation to A",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "B",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "2,a,",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "check relation B -> A",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "3",
+        "responseFields": "relations"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+            "id": 3,
+            "relations": "note,2,a,"
+          }
+        }
+      }
+    },
+    {
+      "title": "add relation A -> B",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 32,
+        "relationsAdd": "3,b,"
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "check relation A -> B",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "2",
+        "responseFields": "relations"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+            "id": 2,
+            "relations": "note,3,b,"
+          }
+        }
+      }
+    },
+    {
+      "title": "rm relation A -> B",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": 2,
+        "operation": 32,
+        "relationsRm": "3"
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "check removed A -> B",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "2",
+        "responseFields": "relations"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+            "id": 2,
+            "relations": ""
+          }
+        }
+      }
+    }
+  ]
+}
