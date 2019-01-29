@@ -1,0 +1,154 @@
+{
+  "title": "get access",
+  "steps": [
+    {
+      "title": "create user Joe",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "create user Bill",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Bill",
+        "ctype": "text/plain",
+        "content": "Bill Delatour Dauterive",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "create Joe's node A",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "A",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "not checks access with invalid user",
+      "method": "getAccess",
+      "params": {
+        "user": "a",
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not checks access with invalid idA",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": "a",
+        "idB": 3
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not checks access with invalid idB",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": null
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "Joe not checks access Bill -> A",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "Joe not checks access A -> Bill",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 3,
+        "idB": 2
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "Joe checks access Joe -> Bill",
+      "method": "getAccess",
+      "params": {
+        "user": 1,
+        "idA": 1,
+        "idB": 2
+      },
+      "result": {
+        "error": false,
+        "value": 0
+      }
+    },
+    {
+      "title": "Bill checks access Joe -> Bill",
+      "method": "getAccess",
+      "params": {
+        "user": 2,
+        "idA": 1,
+        "idB": 2
+      },
+      "result": {
+        "error": false,
+        "value": 0
+      }
+    }
+  ]
+}

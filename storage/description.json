@@ -13,5 +13,48 @@
   "storageConstants": {
     "operations": ["delete", "title", "content", "flags", "meta", "relations"],
     "rights": ["read", "relate", "write", "delete", "create_access_to", "create_access_from"]
+  },
+  "storageErrors": {
+    "getNodes": {
+      "user": "user must be a positive integer",
+      "idIn": "idIn must be a string of integers joined with comma",
+      "idOut": "idOut must be a string of integers joined with comma",
+      "idMin": "idMin must be an integer",
+      "idMax": "idMax must be an integer",
+      "classIn": "classIn must be a string of words joined with comma",
+      "classOut": "classOut must be a string of words joined with comma",
+      "titleLike": "titleLike must be a string",
+      "contentLike": "contentLike must be a string",
+      "relationsIn": "relationsIn must be a string of multiple of 4 words joined with comma. groups: [word, int, float, float]",
+      "relationsOut": "relationsOut must be a string of multiple of 4 words joined with comma. groups: [word, int, float, float]",
+      "responseFields":  "responseFields must be a string of words joined with comma",
+      "sort": "sort must be a string: 'asc' or 'desc'",
+      "limit": "limit must be a positive integer"
+    },
+    "editNode": {
+      "user": "user must be a positive integer or empty string",
+      "id": "id must be a positive integer or empty string",
+      "no_right_to_write": "user has no right to write",
+      "no_right_to_delete": "user has no right to delete",
+      "no_right_to_relate": "user has no right to relate",
+      "relation_not_found": "relation node not found",
+      "node_not_found": "node not found"
+    },
+    "getAccess": {
+      "user": "user must be a positive integer",
+      "idA": "idA must be a positive integer",
+      "idB": "idB must be a positive integer",
+      "user_has_no_right_to_see_access_from": "user has no right to see access from",
+      "user_has_no_right_to_see_access_to": "user has no right to see access to"
+    },
+    "editAccess": {
+      "user": "user must be a positive integer",
+      "idA": "idA must be a positive integer",
+      "idB": "idB must be a positive integer",
+      "rights": "rights must be not negative integer",
+      "user_has_no_right_to_create_access_from": "user has no right to create access from",
+      "user_has_no_right_to_create_access_to": "user has no right to create access to",
+      "node_not_found": "node not found"
+    }
   }
 }

@@ -1,0 +1,474 @@
+{
+  "title": "get nodes",
+  "steps": [
+    {
+      "title": "create user Joe",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "create user Bill",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Bill",
+        "ctype": "text/plain",
+        "content": "Bill Delatour Dauterive",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "create node A by Joe",
+      "method": "editNode",
+      "params": {
+        "id": null,
+        "user": "1",
+        "class": "note",
+        "operation": 62,
+        "title": "note A about a cat",
+        "ctype": "text/plain",
+        "content": "content of A",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "create node B by Joe",
+      "method": "editNode",
+      "params": {
+        "id": null,
+        "user": "1",
+        "class": "note",
+        "operation": 62,
+        "title": "note B about dogs",
+        "ctype": "text/plain",
+        "content": "text of B",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 4
+      }
+    },
+    {
+      "title": "not get nodes with invalid user",
+      "method": "getNodes",
+      "params": {
+        "user": null
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not get nodes with invalid idIn",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "idIn": "a,b"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not get nodes with invalid idOut",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "idOut": "s"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not get nodes with invalid idMin",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "idMin": "a"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not get nodes with invalid idMax",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "idMax": "a"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not get nodes with invalid relationsIn (length)",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "relationsIn": "note,1,0.3"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not get nodes with invalid sort",
+      "method": "getNodes",
+      "params": {
+        "user": 1,
+        "sort": "ascending"
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "get nodes A, B by idIn + sort asc",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "3,4,5",
+        "sort": "asc"
+      },
+      "result": {
+        "length": 2,
+        "checkArray": {
+            "0": {
+                "id": "3"
+            },
+            "1": {
+                "id": "4"
+            }
+        }
+      }
+    },
+    {
+      "title": "get nodes A, B by idIn + sort desc",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "3,4,5",
+        "sort": "desc"
+      },
+      "result": {
+        "length": 2,
+        "checkArray": {
+            "0": {
+                "id": "4"
+            },
+            "1": {
+                "id": "3"
+            }
+        }
+      }
+    },
+    {
+      "title": "get node B by idIn + sort desc + limit",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "3,4,5",
+        "sort": "desc",
+        "limit": 1
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+            "0": {
+                "id": "4"
+            }
+        }
+      }
+    },
+    {
+      "title": "get node A by idIn + idOut",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "3,4",
+        "idOut": "4"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "3"
+          }
+        }
+      }
+    },
+    {
+      "title": "get nodes A, B by idMin",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idMin": "3"
+      },
+      "result": {
+        "length": 2
+      }
+    },
+    {
+      "title": "get nodes A, B by idMin + idMax",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idMin": "3",
+        "idMax": "4"
+      },
+      "result": {
+        "length": 1
+      }
+    },
+    {
+      "title": "get node A, B by classIn + sort",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "classIn": "note",
+        "sort": "asc"
+      },
+      "result": {
+        "length": 2,
+        "checkArray": {
+            "0": {
+                "id": "3"
+            }
+        }
+      }
+    },
+    {
+      "title": "get node A, B by classOut + sort",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "classOut": "user",
+        "sort": "asc"
+      },
+      "result": {
+        "length": 2,
+        "checkArray": {
+            "0": {
+                "id": "3"
+            }
+        }
+      }
+    },
+    {
+      "title": "get node A by idOut + classIn",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idOut": "4",
+        "classIn": "note"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "3"
+          }
+        }
+      }
+    },
+    {
+      "title": "get node A by titleLike regex:cat",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "titleLike": "regex:cat"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "3"
+          }
+        }
+      }
+    },
+    {
+      "title": "get node A by titleLike regex:note [^B]",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "titleLike": "regex:note [^B]"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "3"
+          }
+        }
+      }
+    },
+    {
+      "title": "get node B by titleLike regex:d[a-z]{1,}}",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "titleLike": "regex:no[a-z]+.*d[a-z]{1,}"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "4"
+          }
+        }
+      }
+    },
+    {
+      "title": "add relation A -> B",
+      "method": "editNode",
+      "params": {
+        "user": "1",
+        "id": "3",
+        "operation": 32,
+        "relationsAdd": "4,rel_to_B,0.5"
+      },
+      "result": {
+        "value": 3
+      }
+    },
+    {
+      "title": "get node A",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "idIn": "3",
+        "responseFields": "relations"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+            "0": {
+                "relations": "note,4,rel_to_B,0.5"
+            }
+        }
+      }
+    },
+    {
+      "title": "get node A by relationsIn 'note,,,' using class",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "relationsIn": "note,,,"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "3"
+          }
+        }
+      }
+    },
+    {
+      "title": "get node B by class and relationsIn 'note,,,' using class",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "classIn": "note",
+        "relationsOut": "note,,,"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "4"
+          }
+        }
+      }
+    },
+    {
+      "title": "not get node A by relationsIn ',4,,' using id",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "relationsIn": ",4,0,"
+      },
+      "result": {
+        "length": 1
+      }
+    },
+    {
+      "title": "not get node A by relationsIn ',4,0.7,' using id+minValue",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "relationsIn": ",4,0.7,"
+      },
+      "result": {
+        "length": 0
+      }
+    },
+    {
+      "title": "not get node A by relationsIn ',4,,0.4' using id+maxValue",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "relationsIn": ",4,,0.4"
+      },
+      "result": {
+        "length": 0
+      }
+    },
+    {
+      "title": "get node A by relationsIn ',4,0.3,' using id+minValue ",
+      "method": "getNodes",
+      "params": {
+        "user": "1",
+        "relationsIn": ",4,0.3,"
+      },
+      "result": {
+        "length": 1,
+        "checkArray": {
+          "0": {
+              "id": "3"
+          }
+        }
+      }
+    }
+  ]
+}

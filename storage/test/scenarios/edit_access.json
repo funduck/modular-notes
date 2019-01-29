@@ -1,0 +1,185 @@
+{
+  "title": "edit node with access",
+  "steps": [
+    {
+      "title": "create user Joe",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Joe",
+        "ctype": "text/plain",
+        "content": "Joe Andrew Smith",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 1
+      }
+    },
+    {
+      "title": "create user Bill",
+      "method": "editNode",
+      "params": {
+        "user": null,
+        "id": null,
+        "class": "user",
+        "operation": 62,
+        "title": "Bill",
+        "ctype": "text/plain",
+        "content": "Bill Delatour Dauterive",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "create Joe's node A",
+      "method": "editNode",
+      "params": {
+        "user": 1,
+        "id": null,
+        "class": "note",
+        "operation": 62,
+        "title": "test node",
+        "ctype": "text/plain",
+        "content": "A",
+        "flags": 0,
+        "meta": "{}",
+        "relationsAdd": "",
+        "relationsRm": ""
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "not editAcces with invalid user",
+      "method": "editAccess",
+      "params": {
+        "user": null,
+        "idA": 1,
+        "idB": 2,
+        "rights": 32
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not editAcces with invalid idA",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": "ss",
+        "idB": 2,
+        "rights": 32
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not editAcces with invalid idB",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 1,
+        "idB": "",
+        "rights": 32
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "not editAcces with invalid rights",
+      "method": "editAccess",
+      "params": {
+        "user": 2,
+        "idA": 1,
+        "idB": 2,
+        "rights": ""
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "Joe not gives Bill write access to node A without access to Bill",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3,
+        "rights": 4
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "Joe not gives node A write access to Bill without access to Bill",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 3,
+        "idB": 2,
+        "rights": 4
+      },
+      "result": {
+        "error": true
+      }
+    },
+    {
+      "title": "Bill gives Joe right to 'create access from' to Bill",
+      "method": "editAccess",
+      "params": {
+        "user": 2,
+        "idA": 1,
+        "idB": 2,
+        "rights": 32
+      },
+      "result": {
+        "error": false,
+        "value": 2
+      }
+    },
+    {
+      "title": "Joe gives Bill write access to node A",
+      "method": "editAccess",
+      "params": {
+        "user": 1,
+        "idA": 2,
+        "idB": 3,
+        "rights": 4
+      },
+      "result": {
+        "error": false,
+        "value": 3
+      }
+    },
+    {
+      "title": "Bill not gets node A without read access",
+      "method": "getNodes",
+      "params": {
+        "user": "2",
+        "idIn": "3"
+      },
+      "result": {
+        "length": 0
+      }
+    }
+  ]
+}
