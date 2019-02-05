@@ -1,0 +1,17 @@
+{
+  "name": "modular-notes-nodejs-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "console_logger.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "js-yaml": "^3.12.1"
+  }
+}

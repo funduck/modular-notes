@@ -2,6 +2,5 @@
     "log_level": "verbose",
     "storage_file": {
         "filename": "database.json"
-    },
-    "port": 9002
+    }
 }

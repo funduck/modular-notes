@@ -1,0 +1,127 @@
+'use strict';
+
+const when = require('when');
+const Busboy = require('busboy');
+
+const mainConfig = require('../config');
+const logger = require('../../utils/nodejs/console_logger').get('storage');
+const Messages = require('../../utils/nodejs/messages');
+const Message = Messages.Message;
+const description = require('../description');
+
+module.exports = {
+    start: null,
+    server: null,
+    storage: null
+};
+
+const start = function (config, options) {
+    config = Object.assign({}, mainConfig, config);
+    options = Object.assign({storage: 'file'}, options);
+    const storage = require('./storage_' + options.storage)(config.storage[options.storage]);
+    module.exports.storage = storage;
+
+    const FormData = require('form-data');
+    const express = require('express');
+    const bodyParser = require('body-parser');
+    const app = express();
+
+    app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+    
+    const port = config.port;
+
+    const callback = function (method) {
+        const methodParams = description[method].arguments;
+        return (req, res) => {
+            const msg = new Message('where', 'server', 'what', req.method);
+            logger.info(msg);
+            logger.verbose(msg.clone('query', req.query));
+            logger.debug(msg.clone('headers', req.headers));
+            when().then(() => {
+                if (req.headers['content-type'].match(/multipart\/form-data/)) {
+                    const defer = when.defer();
+                    const busboy = new Busboy({ headers: req.headers });
+                    busboy.on('field', function (field, val, fieldTruncated, valTruncated, encoding, mimetype) {
+                        req.body[field] = val;
+                    });
+                    busboy.on('finish', function() {
+                        logger.debug(msg.clone('body', req.body));
+                        defer.resolve();
+                    });
+                    req.pipe(busboy);
+                    return defer.promise;
+                }
+            })
+            .then(() => {
+                const params = Object.assign({}, req.params, req.query, req.body);
+                const ar = [];
+                for (let p = 0; p < methodParams.length; p++) {
+                    ar.push(params[methodParams[p].name]);
+                }
+                logger.debug(msg.clone('what', 'call storage', 'args', ar));
+                return storage[method](...ar);
+            })
+            .then((result) => {
+                let isMultipart = false;
+                let form;
+                const startMultipart = () => {
+                    if (!isMultipart) {
+                        form = new FormData();
+                        res.set('Content-Type', 'multipart/form-data; charset=utf-8; boundary=' + form._boundary);
+                        isMultipart = true;
+                        form.pipe(res);
+                    }
+                };
+                const toBody = (_result) => {
+                    startMultipart();
+                    if (Array.isArray(_result)) {
+                        for (let i = 0; i < _result.length; i++) {
+                            toBody(_result[i]);
+                        }
+                        return;
+                    }
+                    if (typeof _result == 'object') {
+                        for ([key, val] of Object.entries(_result)) {
+                            form.append(key, val);
+                        }
+                    } else {
+                        form.append('result', _result);
+                    }
+                };
+                res.status(200);
+                if (typeof result == 'object') {
+                    toBody(result);
+                } else {
+                    res.set('Content-Type', 'text/plain; charset=utf-8');
+                    res.write(result);
+                }
+                if (isMultipart) {
+                    form.end();
+                } else {
+                    res.end();
+                }
+            })
+            .catch((e) => {
+                const error = description[method].errors[e.message];
+                if (error) {
+                    res.status(error.code).send(error.text);
+                } else {
+                    res.status(500).send('unexpected error: ' + e.mesage);
+                }
+            });
+        }
+    };
+    app.get('/nodes', callback('getNodes'));
+    app.get('/access', callback('getAccess'));
+    app.post('/node/:id', callback('editNode'));
+    app.post('/access', callback('editAccess'));
+
+    module.exports.server = app.listen(port, () => {
+        logger.info(new Message('where', 'server', 'what', 'listening', 'port', port));
+    });
+};
+module.exports.start = start;
+
+if (process.argv[1].indexOf(module.filename) >= 0) {
+    start();
+}

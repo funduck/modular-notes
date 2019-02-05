@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const storageMethods = require('../../description').storageMethods;
+const description = require('../../description');
 
 // require('../../../utils/nodejs/console_logger').get('storage').setLevel('debug');
 
@@ -42,8 +42,9 @@ describe('File based storage', function() {
                 it('step: ' + step.title, (done) => {
                     let failed;
                     const ar = [];
-                    for (let p = 0; p < storageMethods[step.method].length; p++) {
-                        ar.push(step.params[storageMethods[step.method][p]]);
+                    const argNames = description[step.method].arguments;
+                    for (let p = 0; p < argNames.length; p++) {
+                        ar.push(step.params[argNames[p].name]);
                     }
 
                     storage[step.method](...ar)

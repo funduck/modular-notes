@@ -23,6 +23,7 @@ module.exports = {
                     if (typeof lvl == 'string') {
                         logger.level = logger.levels[lvl.toLowerCase()];
                     }
+                    return logger;
                 },
                 log: (level, ...args) => {
                     const lvl = logger.levels[level.toLowerCase()];
@@ -34,24 +35,25 @@ module.exports = {
                         }
                         console.log(level.toUpperCase().padEnd(10), name.toUpperCase().padEnd(10), ...args);
                     }
+                    return logger;
                 },
                 fatal: (...args) => {
-                    logger.log('FATAL', ...args);
+                    return logger.log('FATAL', ...args);
                 },
                 error: (...args) => {
-                    logger.log('ERROR', ...args);
+                    return logger.log('ERROR', ...args);
                 },
                 warn: (...args) => {
-                    logger.log('WARN', ...args);
+                    return logger.log('WARN', ...args);
                 },
                 info: (...args) => {
-                    logger.log('INFO', ...args);
+                    return logger.log('INFO', ...args);
                 },
                 verbose: (...args) => {
-                    logger.log('VERBOSE', ...args);
+                    return logger.log('VERBOSE', ...args);
                 },
                 debug: (...args) => {
-                    logger.log('DEBUG', ...args);
+                    return logger.log('DEBUG', ...args);
                 }
             };
             logger.setLevel(process.env['MN_' + name.toUpperCase() + '_LOG_LEVEL'] || 'error');

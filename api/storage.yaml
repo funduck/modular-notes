@@ -1,0 +1,513 @@
+openapi: "3.0.2"
+info:
+  title: Modular Notes Storage
+  description: ""
+  termsOfService: ""
+  contact:
+    name: developer
+    url: example.com
+    email: support@example.com
+  license:
+    name: ""
+    url: ""
+  version: "1"
+servers:
+  - url: localhost:9001
+    description: local
+paths:
+  /nodes:
+    get:
+      summary: ""
+      description: "Returns list of found Nodes to which User has access"
+      tags:
+        - read
+      operationId: getNodes
+      parameters:
+        - name: user
+          description: User performing request
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: idIn
+          description: Node.id is one of
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryArrayInt'
+        - name: idOut
+          description: Node.id is none of
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryArrayInt'
+        - name: idMin
+          description: Node.id is greater or equal
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: idMax
+          description: Node.id is less
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: classIn
+          description: Node.class is one of
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryArrayString'
+        - name: classOut
+          description: Node.class is none of
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryArrayString'
+        - name: titleLike
+          description: Node.title matches filter with mechanism defined in prefix, for example for POSIX regex it is "regex:"
+          in: query
+          schema:
+            type: string
+          example: "regex:^agent[0-9]{1,3}$"
+        - name: contentLike
+          description: Node.content matches filter with mechanism defined in prefix, for example for full text search it is "fts:"
+          in: query
+          schema:
+            type: string
+          example: 'fts:cat'
+        - name: relationsIn
+          description: Node.relations must contain relation described here as 4-items array "class,id,minValue,maxValue"
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryRelations'
+        - name: relationsOut
+          description: Node.relations must not contain relation described here as 4-items array "class,id,minValue,maxValue"
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryRelations'
+        - name: responseFields
+          description: Fields of Node in response. "id" is always included
+          in: query
+          schema:
+            $ref: '#/components/schemas/queryArrayString'
+          example:
+            - id
+            - author
+            - title
+        - name: sort
+          description: Sorting results by "id", default is "asc"
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: limit
+          description: Limit results
+          in: query
+          schema:
+            type: integer
+            example: 10
+      responses:
+        200:
+          description: ""
+          content:
+            multipart/form-data:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    author:
+                      type: integer
+                    class:
+                      type: string
+                    title:
+                      type: string
+                    ctype:
+                      type: string
+                      example: "texp/plain"
+                    content:
+                      type: string
+                      format: binary
+                    flags:
+                      type: integer
+                    meta:
+                      type: string
+                      description: valid JSON
+                      example: "{}"
+                    relations:
+                      type: string
+                      description: string of array of 4-items "class,id,localTitle,localValue" with localTitle URL encoded
+                      example: "image,4,dog,,image,5,cat,3.14"
+                    ignoredParameters:
+                      type: string
+                      description: some parameters may be ignored, for example contentLike="fts:cat" and titleLike="fts:cat"
+                      example: contentLike,titleLike
+        403:
+          description: access denied
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'read: user has no right to read node'
+        404:
+          description: not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'node: not found'
+                  - 'relation: node not found'
+        422:
+          description: invalid parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'user: must be a positive integer'
+                  - 'idIn: must be a string of integers joined with comma'
+                  - 'idOut: must be a string of integers joined with comma'
+                  - 'idMin: must be an integer'
+                  - 'idMax: must be an integer'
+                  - 'classIn: must be a string of words joined with comma'
+                  - 'classOut: must be a string of words joined with comma'
+                  - 'titleLike: must be a string'
+                  - 'contentLike: must be a string'
+                  - 'relationsIn: must be a string of 4-items (string,int,float,float) "class,id,minValue,maxValue"'
+                  - 'relationsOut: must be a string of 4-items (string,int,float,float) "class,id,minValue,maxValue"'
+                  - 'responseFields: must be a string of array of Node fields names'
+                  - 'sort: must be a string: "asc" or "desc"'
+                  - 'limit: must be a positive integer'
+        500:
+          $ref: '#/components/responses/internal_error'
+        503:
+          $ref: '#/components/responses/temporarily_unavailable'
+  /node/{id}:
+    post:
+      summary: ""
+      description: "Edit Node if User has access. Returns Node.id"
+      tags:
+        - write
+      operationId: editNode
+      parameters:
+        - name: id
+          description: Node.id, empty when creating Node
+          in: path
+          required: true
+          allowEmptyValue: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: user
+          description: User performing request, empty when creating User
+          in: query
+          required: true
+          allowEmptyValue: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: operation
+          description: Integer whose bits mean ["delete", "title", "content", "flags", "meta", "relations"].  1 is "delete", 6 is set title+content
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 62
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                class:
+                  description: 1 when creating User must be "user"
+                  type: string
+                title:
+                  description: "2"
+                  type: string
+                ctype:
+                  description: "3"
+                  type: string
+                content:
+                  description: "4"
+                  type: string
+                flags:
+                  description: "5"
+                  type: integer
+                meta:
+                  description: "6"
+                  type: string
+                relationsAdd:
+                  description: 7 Relations to be added, an array of 3-items "id,localTitle,localValue" with localTitle URL encoded
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - "3,dog,"
+                    - "4,cat,3.14"
+                relationsRm:
+                  description: 8 Relations to remove, only ids
+                  type: array
+                  items:
+                    type: integer
+                  example:
+                    - 3
+                    - 4
+      responses:
+        200:
+          $ref: '#/components/responses/integer'
+        403:
+          description: access denied
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'write: user has no right to write'
+                  - 'delete: user has no right to delete'
+                  - 'relate: user has no right to relate'
+        404:
+          description: not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'node: not found'
+                  - 'relation: node not found'
+        422:
+          description: invalid parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'id: must be a positive integer or empty string'
+                  - 'user: must be a positive integer or empty string'
+                  - 'class: must be a string'
+                  - 'title: must be a string'
+                  - 'ctype: must be a string'
+                  - 'content: must be a string'
+                  - 'flags: must be an integer'
+                  - 'meta: must be a string of valid JSON'
+                  - 'relationsAdd or relationsRm: must not be empty'
+                  - 'relationsAdd: must be a string of array of 3-items (int,float,float) "id,localTitle,localValue"'
+                  - 'relationsRm: must be a string of integers "id1,id2,.."'
+        500:
+          $ref: '#/components/responses/internal_error'
+        503:
+          $ref: '#/components/responses/temporarily_unavailable'
+  /access:
+    get:
+      summary: ""
+      description: "Returns access of Node A to Node B"
+      tags:
+        - read
+      operationId: getAccess
+      parameters:
+        - name: user
+          description: User performing request
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: idA
+          description: Node A id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: idB
+          description: Node B id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+      responses:
+        200:
+          $ref: '#/components/responses/integer'
+        403:
+          description: access denied
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'idA: user has no right to see access from'
+                  - 'idB: user has no right to see access to'
+        404:
+          description: not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'idA: node not found'
+                  - 'idB: node not found'
+        422:
+          description: invalid parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'user: must be a positive integer'
+                  - 'idA: must be a positive integer'
+                  - 'idB: must be a positive integer'
+        500:
+          $ref: '#/components/responses/internal_error'
+        503:
+          $ref: '#/components/responses/temporarily_unavailable'
+    post:
+      summary: ""
+      description: "Edit access of Node A to Node B if User has access to both. Returns Node B id"
+      tags:
+        - write
+      operationId: editAccess
+      parameters:
+        - name: user
+          description: User performing request
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: idA
+          description: Node A id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: idB
+          description: Node B id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+        - name: rights
+          description: Integer whose bits mean ["read", "relate", "write", "delete", "create_access_to", "create_access_from"]. 1 is "read", 3 is read+relate
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'
+          example: 32
+      responses:
+        200:
+          $ref: '#/components/responses/integer'
+        403:
+          description: access denied
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'idA: user has no right to create access from'
+                  - 'idB: user has no right to create access to'
+        404:
+          description: not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'idA: node not found'
+                  - 'idB: node not found'
+        422:
+          description: invalid parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - 'user: must be a positive integer'
+                  - 'idA: must be a positive integer'
+                  - 'idB: must be a positive integer'
+                  - 'rights: must be not negative integer'
+        500:
+          $ref: '#/components/responses/internal_error'
+        503:
+          $ref: '#/components/responses/temporarily_unavailable'
+components:
+  schemas:
+    queryInt:
+      type: integer
+      example: 1
+    queryArrayInt:
+      type: array
+      items:
+        type: integer
+      example:
+        - 2
+        - 3
+    queryArrayString:
+      type: array
+      items:
+        type: string
+      example:
+        - word
+        - another_word
+    queryRelations:
+      type: array
+      items:
+        type: string
+      example:
+        - 'audio,4,0.5,1.7'
+        - 'image,,,'
+        - ',5,,'
+        - ',6,3.14,'
+        - ',7,,5.45'
+  responses:
+    integer:
+      description: ""
+      content:
+        text/plain:
+          schema:
+            type: integer
+          example: 3
+    internal_error:
+      description: "internal error"
+      content:
+        text/plain:
+          schema:
+            type: string
+            enum:
+              - something bad happened
+    temporarily_unavailable:
+      description: "temporarily unavailable"
+      content:
+        text/plain:
+          schema:
+            type: string
+            enum:
+              - temporarily unavailable
+security: []
+tags:
+  - name: read
+  - name: write
+x-method-constants:
+  editNode:
+    operations:
+      - delete
+      - title
+      - content
+      - flags
+      - meta
+      - relations
+    flags:
+      - undefined
+  getNodes:
+    flags:
+      - undefined
+  editAccess:
+    rights:
+      - read
+      - relate
+      - write
+      - delete
+      - create_access_to
+      - create_access_from
+  getAccess:
+    rights:
+      - read
+      - relate
+      - write
+      - delete
+      - create_access_to
+      - create_access_from

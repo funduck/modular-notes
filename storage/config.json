@@ -1,0 +1,9 @@
+{
+  "log_level": "verbose",
+  "port": 9001,
+  "storage": {
+    "file": {
+      "filename": "database.json"
+    }
+  }
+}

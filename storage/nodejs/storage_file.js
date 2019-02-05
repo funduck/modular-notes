@@ -4,7 +4,7 @@ const assert = require('assert');
 const when = require('when');
 const NeDB = require('nedb');
 const Hash = require('crypto').Hash;
-const LRU = require("lru-cache");
+const LRU = require('lru-cache');
 
 const Message = require('../../utils/nodejs/messages').Message;
 
@@ -107,7 +107,7 @@ module.exports = (config) => {
         return d.promise;
     };
 
-    const drts = description.storageConstants.rights;
+    const drts = description.editAccess.constants.rights;
     const fullAccess = parseInt(''.padEnd(drts.length, '1'), 2);
     const accessHas = {};
     const accessIs = {};
@@ -159,7 +159,7 @@ module.exports = (config) => {
     let _create = 0;
     // first operation is 'delete', all other are positive, so 'create' is sum of positives
     _create--;
-    const dops = description.storageConstants.operations;
+    const dops = description.editNode.constants.operations;
     for (let i = 0; i < dops.length; i++) {
         operationHas[dops[i]] = (val) => (val & Math.pow(2, i)) > 0;
         operationIs[dops[i]] = (val) => (val == Math.pow(2, i));
@@ -186,7 +186,7 @@ module.exports = (config) => {
 
     const makeRelationsFilter = (relationsFilter) => {
         const filter = {};
-        assert(relationsFilter.length % 4 == 0);
+        assert(relationsFilter.length % 4 == 0, 'length of relations filter must be multiple of 4');
         for (let i = 0; i < relationsFilter.length / 4; i++) {
             const rType = relationsFilter[4*i];
             const rId = parseInt(relationsFilter[4*i + 1], 10);
@@ -233,8 +233,7 @@ module.exports = (config) => {
     /* HELPERS */
     /*******************/
     /* STORAGE METHODS */
-
-    const storage = Object.assign({}, description.storageMethods);
+    const storage = {};
 
     storage.clear = function () {
         cache.reset();
@@ -251,41 +250,43 @@ module.exports = (config) => {
         return d.promise;
     };
 
+    // @return {number}
     storage.getAccess = function (user, idA, idB) {
-        let msg = new Message('where', 'getAccess()', 'user', user);
-        logger.verbose(msg.clone('idA', idA, 'idB', idB));
-        const storageErrors = description.storageErrors.getAccess;
         let checkingParam;
-        try {
-            checkingParam = 'user';
-            user = JSON.parse(user);
-            assert(typeof user == 'number');
-            checkingParam = 'idA';
-            idA = JSON.parse(idA);
-            assert(typeof idA == 'number');
-            checkingParam = 'idB';
-            idB = JSON.parse(idB);
-            assert(typeof idB == 'number');
-        } catch (e) {
-            logger.error(msg.set('what', 'invalid params', 'error', e.message));
-            return when.reject(new Error(storageErrors[checkingParam]));
-        }
-        return when.join(
-            (user == idB) ? when() :
-            getAccessRights.call(msg, user, idA)
-            .then((rights) => {
-                if (!accessHas.create_access_from(rights)) {
-                    throw new Error(storageErrors['user_has_no_right_to_see_access_from'] + ' ' + idA);
-                }
-            }),
-            (user == idA) ? when() :
-            getAccessRights.call(msg, user, idB)
-            .then((rights) => {
-                if (!accessHas.create_access_to(rights)) {
-                    throw new Error(storageErrors['user_has_no_right_to_see_access_to'] + ' ' + idB);
-                }
-            })
-        )
+        let msg = new Message('where', 'getAccess()', 'user', user);
+        return when().then(() => {
+            logger.verbose(msg.clone('idA', idA, 'idB', idB));
+            try {
+                checkingParam = 'user';
+                user = JSON.parse(user);
+                assert(typeof user == 'number', 'typeof "user" must be number');
+                checkingParam = 'idA';
+                idA = JSON.parse(idA);
+                assert(typeof idA == 'number', 'typeof "idA" must be number');
+                checkingParam = 'idB';
+                idB = JSON.parse(idB);
+                assert(typeof idB == 'number', 'typeof "idB" must be number');
+            } catch (e) {
+                logger.error(msg.setm('what', 'invalid params', 'error', e.message));
+                return when.reject(new Error('invalid parameter:'+checkingParam));
+            }
+            return when.join(
+                (user == idB) ? when() :
+                    getAccessRights.call(msg, user, idA)
+                    .then((rights) => {
+                        if (!accessHas.create_access_from(rights)) {
+                            throw new Error('access denied:idA');
+                        }
+                    }),
+                (user == idA) ? when() :
+                    getAccessRights.call(msg, user, idB)
+                    .then((rights) => {
+                        if (!accessHas.create_access_to(rights)) {
+                            throw new Error('access denied:idB');
+                        }
+                    })
+            );
+        })
         .then(() => {
             return getAccessRights.call(msg, idA, idB);
         })
@@ -304,45 +305,47 @@ module.exports = (config) => {
 
     // @return {number} idB
     storage.editAccess = function (user, idA, idB, rights) {
-        let msg = new Message('where', 'editAccess()', 'user', user);
-        logger.verbose(msg);
-        logger.debug(msg.clone('idA', idA, 'idB', idB, 'rights', rights));
-        const storageErrors = description.storageErrors.editAccess;
         let checkingParam;
-        try {
-            checkingParam = 'user';
-            user = JSON.parse(user);
-            assert(typeof user == 'number');
-            checkingParam = 'idA';
-            idA = JSON.parse(idA);
-            assert(typeof idA == 'number');
-            checkingParam = 'idB';
-            idB = JSON.parse(idB);
-            assert(typeof idB == 'number');
-            checkingParam = 'rights';
-            rights = JSON.parse(rights);
-            assert(typeof rights == 'number');
-        } catch (e) {
-            logger.error(msg.set('what', 'invalid params', 'error', e.message));
-            return when.reject(new Error(storageErrors[checkingParam]));
-        }
-        const isCreateAccessFromSelf = (user == idB && accessIs.create_access_from(rights));
-        return when.join(
-            isCreateAccessFromSelf ? when() :
-            getAccessRights.call(msg, user, idA)
-            .then((_rights) => {
-                if (!accessHas.create_access_from(_rights)) {
-                    throw new Error(storageErrors['user_has_no_right_to_create_access_from'] + ' ' + idA);
-                }
-            }),
-            isCreateAccessFromSelf ? when() :
-            getAccessRights.call(msg, user, idB)
-            .then((_rights) => {
-                if (!accessHas.create_access_to(_rights)) {
-                    throw new Error(storageErrors['user_has_no_right_to_create_access_to'] + ' ' + idB);
-                }
-            })
-        )
+        let msg = new Message('where', 'editAccess()', 'user', user);
+        return when().then(() => {
+            logger.verbose(msg);
+            logger.debug(msg.clone('idA', idA, 'idB', idB, 'rights', rights));
+            try {
+                checkingParam = 'user';
+                user = JSON.parse(user);
+                assert(typeof user == 'number', 'typeof "user" must be number');
+                checkingParam = 'idA';
+                idA = JSON.parse(idA);
+                assert(typeof idA == 'number', 'typeof "idA" must be number');
+                checkingParam = 'idB';
+                idB = JSON.parse(idB);
+                assert(typeof idB == 'number', 'typeof "idB" must be number');
+                checkingParam = 'rights';
+                rights = JSON.parse(rights);
+                assert(typeof rights == 'number', 'typeof "rights" must be number');
+            } catch (e) {
+                logger.error(msg.setm('what', 'invalid params', 'error', e.message));
+                return when.reject(new Error('invalid parameter:'+checkingParam));
+            }
+            const isCreateAccessFromSelf = (user == idB && accessIs.create_access_from(rights));
+
+            return when.join(
+                isCreateAccessFromSelf ? when() :
+                    getAccessRights.call(msg, user, idA)
+                    .then((_rights) => {
+                        if (!accessHas.create_access_from(_rights)) {
+                            throw new Error('access denied:idA');
+                        }
+                    }),
+                isCreateAccessFromSelf ? when() :
+                    getAccessRights.call(msg, user, idB)
+                    .then((_rights) => {
+                        if (!accessHas.create_access_to(_rights)) {
+                            throw new Error('access denied:idB');
+                        }
+                    })
+            );
+        })
         .then(() => {
             const d = when.defer();
             const set = {};
@@ -356,7 +359,7 @@ module.exports = (config) => {
             logger.debug(msg.clone('what', 'db.update()', 'filter', filter, 'update', update));
             db.update(filter, update, (err, numAffected) => {
                 if (err) return d.reject(err);
-                if (numAffected == 0) return d.reject(new Error(storageErrors.node_not_found + ' ' + idB));
+                if (numAffected == 0) return d.reject(new Error('not found:idB'));
                 d.resolve(idB);
             });
             return d.promise;
@@ -378,75 +381,78 @@ module.exports = (config) => {
     storage.editNode = function (
         id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm
     ) {
-        let msg = new Message('where', 'editNode()', 'user', user, 'id', id);
-        logger.verbose(msg);
-        logger.debug(
-            msg.clone('args', [id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm])
-        );
-        const storageErrors = description.storageErrors.editNode;
         let checkingParam;
-        try {
-            checkingParam = 'user';
-            user = JSON.parse(user || 'null');
-            checkingParam = 'id';
-            id = JSON.parse(id || 'null');
-            checkingParam = 'operation';
-            assert(operation != null, '"operation" cannot be null');
-            if (operationHas.title(operation)) {
-                checkingParam = 'title';
-                assert(title != null, '"title" cannot be null');
-                assert.equal(typeof title, 'string', 'typeof "title" must be string');
-            }
-            if (operationHas.content(operation)) {
-                checkingParam = 'content';
-                assert(content != null, '"content" cannot be null');
-                assert.equal(typeof ctype, 'string', 'typeof "ctype" must be string');
-            }
-            if (operationHas.flags(operation)) {
-                checkingParam = 'flags';
-                assert(flags != null, '"flags" cannot be null');
-                assert.equal(typeof flags, 'number', 'typeof "flags" must be number');
-            }
-            if (operationHas.meta(operation)) {
-                checkingParam = 'meta';
-                assert(meta != null, '"meta" cannot be null');
-                // check meta is valid json
-                JSON.parse(meta);
-            }
-            if (operationHas.relations(operation)) {
-                checkingParam = 'relations';
-                assert(relationsAdd != null || relationsRm != null, '"relations" cannot be null');
-                relationsAdd = relationsAdd ? relationsAdd.split(',') : [];
-                if (relationsAdd && relationsAdd.length > 0) {
-                    checkingParam = 'relationsAdd';
-                    for (let i = 0; i < relationsAdd.length / 3; i++) {
-                        const rId = relationsAdd[3*i + 0] = JSON.parse(relationsAdd[3*i + 0]);
-                        const rTitle = relationsAdd[3*i + 1] = decodeURIComponent(relationsAdd[3*i + 1]);
-                        const rValue = relationsAdd[3*i + 2] = parseFloat(decodeURIComponent(relationsAdd[3*i + 2]), 10) || undefined;
-                        assert.equal(typeof rId, 'number', '"relation" id must be number');
-                        assert(rId != id, '"relations" cant have the node itself');
-                    }
-                }
-                relationsRm = relationsRm ? relationsRm.split(',') : [];
-                if (relationsRm && relationsRm.length > 0) {
-                    checkingParam = 'relationsRm';
-                    for (let i = 0; i < relationsRm.length; i++) {
-                        const rId = relationsRm[i] = JSON.parse(relationsRm[i]);
-                        assert.equal(typeof rId, 'number', '"relation" id must be number');
-                        assert(rId != id, '"relations" cant have the node itself');
-                    }
-                }
-            }
-            if (operationHas.create(operation)) {
-                checkingParam = 'class';
-                assert(klass != null, '"class" cannot be null');
-                assert.equal(typeof klass, 'string', 'typeof "class" must be string');
-            }
-        } catch (e) {
-            logger.error(msg.set('what', 'invalid params', 'error', e.message));
-            return when.reject(new Error(storageErrors[checkingParam]));
-        }
+        let msg = new Message('where', 'editNode()', 'user', user, 'id', id);
         return when().then(() => {
+            logger.verbose(msg);
+            logger.debug(
+                msg.clone('args', [id, user, operation, klass, title, ctype, content, flags, meta, relationsAdd, relationsRm])
+            );
+            try {
+                checkingParam = 'user';
+                user = JSON.parse(user || 'null');
+                checkingParam = 'id';
+                id = JSON.parse(id || 'null');
+                checkingParam = 'operation';
+                assert(operation != null, '"operation" cannot be null');
+                if (operationHas.title(operation)) {
+                    checkingParam = 'title';
+                    assert(title != null, '"title" cannot be null');
+                    assert.equal(typeof title, 'string', 'typeof "title" must be string');
+                }
+                if (operationHas.content(operation)) {
+                    checkingParam = 'content';
+                    assert(content != null, '"content" cannot be null');
+                    assert.equal(typeof ctype, 'string', 'typeof "ctype" must be string');
+                }
+                if (operationHas.flags(operation)) {
+                    checkingParam = 'flags';
+                    assert(flags != null, '"flags" cannot be null');
+                    assert.equal(typeof flags, 'number', 'typeof "flags" must be number');
+                }
+                if (operationHas.meta(operation)) {
+                    checkingParam = 'meta';
+                    assert(meta != null, '"meta" cannot be null');
+                    // check meta is valid json
+                    JSON.parse(meta);
+                }
+                if (operationHas.relations(operation)) {
+                    checkingParam = 'relationsAdd or relationsRm';
+                    assert(relationsAdd != null || relationsRm != null, 
+                        '"relationsAdd" and "relationsRm" cannot be null together');
+                    relationsAdd = relationsAdd ? relationsAdd.split(',') : [];
+                    if (relationsAdd && relationsAdd.length > 0) {
+                        checkingParam = 'relationsAdd';
+                        for (let i = 0; i < relationsAdd.length / 3; i++) {
+                            const rId = relationsAdd[3*i + 0] = JSON.parse(relationsAdd[3*i + 0]);
+                            const rTitle = relationsAdd[3*i + 1] = decodeURIComponent(relationsAdd[3*i + 1]);
+                            const rValue = relationsAdd[3*i + 2] = parseFloat(
+                                decodeURIComponent(relationsAdd[3*i + 2]), 10) || undefined;
+                            assert.equal(typeof rId, 'number', '"relation" id must be number');
+                            assert(rId != id, 'node cant relate to itself');
+                        }
+                    }
+                    relationsRm = relationsRm ? relationsRm.split(',') : [];
+                    if (relationsRm && relationsRm.length > 0) {
+                        checkingParam = 'relationsRm';
+                        for (let i = 0; i < relationsRm.length; i++) {
+                            const rId = relationsRm[i] = JSON.parse(relationsRm[i]);
+                            assert.equal(typeof rId, 'number', '"relation" id must be number');
+                            assert(rId != id, 'node cant relate to itself');
+                        }
+                    }
+                }
+                if (operationHas.create(operation)) {
+                    checkingParam = 'class';
+                    assert(klass != null, '"class" cannot be null');
+                    assert.equal(typeof klass, 'string', 'typeof "class" must be string');
+                }
+            } catch (e) {
+                logger.error(msg.setm('what', 'invalid params', 'error', e.message));
+                return when.reject(new Error('invalid parameter:'+checkingParam));
+            }
+        })
+        .then(() => {
             if (id == null && user == null && klass == 'user' && operationHas.create(operation)) {
                 return getNextId.call(msg)
                 .then((_id) => {
@@ -465,10 +471,17 @@ module.exports = (config) => {
             }
         })
         .then(() => {
-            assert(user != null, '"user" cannot be null');
-            assert(id != null, 'node "id" cannot be null');
-            user = JSON.parse(user);
-            id = JSON.parse(id);
+            try {
+                checkingParam = 'id';
+                assert(id != null, 'node "id" cannot be null');
+                id = JSON.parse(id);
+                checkingParam = 'user';
+                assert(user != null, '"user" cannot be null');
+                user = JSON.parse(user);
+            } catch (e) {
+                logger.error(msg.setm('what', 'invalid params', 'error', e.message));
+                return when.reject(new Error('invalid parameter:'+checkingParam));
+            }
             return getAccessRights.call(msg, user, id);
         })
         .then((rights) => {
@@ -479,7 +492,7 @@ module.exports = (config) => {
             const relIds = [];
 
             if (operationHas.delete(operation)) {
-                assert(accessHas.delete(rights), storageErrors.no_right_to_delete + ' ' + id);
+                assert(accessHas.delete(rights), 'access denied:delete');
                 msg.set('what', 'deleted node');
                 const filter = {id: id};
                 logger.debug(msg.clone('what', 'db.remove()', 'filter', filter));
@@ -493,7 +506,7 @@ module.exports = (config) => {
                 });
                 return d.promise;
             }
-            assert(accessHas.write(rights), storageErrors.no_right_to_write + ' ' + id);
+            assert(accessHas.write(rights), 'access denied:write');
             msg.set('what', 'updated node');
             if (operationHas.title(operation)) {
                 set.title = title;
@@ -551,9 +564,9 @@ module.exports = (config) => {
                     const userNode = nodes.pop();
                     for (let i = 0; i < nodes.length; i++) {
                         const node = nodes[i];
-                        assert(node != null, storageErrors.relation_not_found + ' ' + relIds[i]);
+                        assert(node != null, 'not found:relation');
                         if (!hasUserRightOnNode(user, userNode, node, 'relate')) {
-                            throw new Error(storageErrors.no_right_to_relate + ' ' + node.id);
+                            throw new Error('access denied:relate');
                         }
                         // setting "class" for easier search
                         if (relationsAdd && i < relationsAdd.length / 3) {
@@ -576,7 +589,7 @@ module.exports = (config) => {
                         return d.reject(err);
                     }
                     if (numAffected == 0) {
-                        return d.reject(new Error(storageErrors.node_not_found));
+                        return d.reject(new Error('not found:node'));
                     }
                     d.resolve(id);
                 });
@@ -595,26 +608,28 @@ module.exports = (config) => {
         });
     };
 
+    // @return {Array.<object>}
     storage.getNodes = function (
-        user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
-            relationsIn, relationsOut, responseFields, sort, limit
+        user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike, relationsIn, relationsOut, 
+        responseFields, sort, limit
     ) {
-        const storageErrors = description.storageErrors.getNodes;
         let checkingParam;
         let msg = new Message('where', 'getNodes()', 'user', user);
-        logger.verbose(msg);
-        logger.debug(
-            msg.clone('args', [user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
-                relationsIn, relationsOut, responseFields, sort, limit])
-        );
-        try {
-            user = JSON.parse(user);
-            assert(typeof user == 'number');
-        } catch (e) {
-            logger.error(msg.set('what', 'invalid params', 'error', e.message));
-            return when.reject(new Error(storageErrors.user));
-        }
-        return getNodesByIds.call(msg, [user])
+        return when().then(() => {
+            logger.verbose(msg);
+            logger.debug(
+                msg.clone('args', [user, idIn, idOut, idMin, idMax, classIn, classOut, titleLike, contentLike,
+                    relationsIn, relationsOut, responseFields, sort, limit])
+            );
+            try {
+                user = JSON.parse(user);
+                assert(typeof user == 'number', 'typeof "user" must be number');
+            } catch (e) {
+                logger.error(msg.setm('what', 'invalid params', 'error', e.message));
+                return when.reject(new Error('invalid parameter:user'));
+            }
+            return getNodesByIds.call(msg, [user])
+        })
         .then((nodes) => {
             const ignoredParameters = [];
             const projection = {id: 1, accessRightsById: 1, _id: 0};
@@ -694,7 +709,7 @@ module.exports = (config) => {
                 cursor = db.find(filter, projection);
                 if (sort) {
                     checkingParam = 'sort';
-                    assert(sort == 'asc' || sort == 'desc');
+                    assert(sort == 'asc' || sort == 'desc', '"sort" must be "asc" or "desc"');
                     cursor = cursor.sort({id: sort == 'asc' ? 1 : -1});
                 }
                 if (limit) {
@@ -702,8 +717,8 @@ module.exports = (config) => {
                     cursor = cursor.limit(parseInt(limit, 10));
                 }
             } catch (e) {
-                logger.error(msg.set('what', 'invalid params', 'error', e.message));
-                return when.reject(new Error(storageErrors[checkingParam]));
+                logger.error(msg.setm('what', 'invalid params', 'error', e.message));
+                return when.reject(new Error('invalid parameter:'+checkingParam));
             }
             const d = when.defer();
             cursor.exec((err, docs) => {

@@ -10,12 +10,12 @@ It is protected internal server providing access to storage without any security
 ### Request
 to get one
 
-    GET /nodes/<**id**>?user=<**user**>&responseFields=<**responseFields**>
+    GET /nodes?user=<**user**>&responseFields=<**responseFields**>
 
 to get multiple or search with paging
 
     GET /nodes?user=<**user**>
-    &<id or idIn>=<**idIn**>&idOut=<**idOut**>&idMin=<**idMin**>&idMax=<**idMax**>
+    &<idIn>=<**idIn**>&idOut=<**idOut**>&idMin=<**idMin**>&idMax=<**idMax**>
     &classIn=<**classIn**>&classOut=<**classOut**>
     &titleLike=<**titleLike**>
     &contentLike=<**contentLike**>
@@ -24,11 +24,11 @@ to get multiple or search with paging
     &sort=<**sort**>&limit=<**limit**>
 
 Returned will be *Nodes* for which User has access 'read'.
-If **id or idIn** were in request and user doesn't have access to even one *Node* then request fails with error.
+If **idIn** were in request and user doesn't have access to even one *Node* then request fails with error.
 
 #### Parameters
 * int **user**
-* string **id or idIn** - comma separated *Node* ids
+* string **idIn** - comma separated *Node* ids
 * string **idOut** - comma separated *Node* ids
 * string **idMin** - minimum *Node* id
 * string **idMax** - maximum *Node* id
@@ -63,7 +63,7 @@ Codes:
 ### Examples
 Request
 
-    GET /nodes/2?user=1
+    GET /nodes?user=1&idIn=2
 
     GET /nodes?user=1&classIn=note,image,video&titleLike=regex%3Adog&contentLike=fts%3Adog&sort=asc&limit=10
 

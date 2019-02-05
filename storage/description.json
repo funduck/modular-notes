@@ -1,60 +1,392 @@
 {
-  "storageMethods": {
-    "editNode": [
-        "id", "user", "operation", "class", "title", "ctype", "content", "flags", "meta", "relationsAdd", "relationsRm"
+  "getNodes": {
+    "path": "/nodes",
+    "method": "get",
+    "arguments": [
+      {
+        "in": "query",
+        "name": "user"
+      },
+      {
+        "in": "query",
+        "name": "idIn"
+      },
+      {
+        "in": "query",
+        "name": "idOut"
+      },
+      {
+        "in": "query",
+        "name": "idMin"
+      },
+      {
+        "in": "query",
+        "name": "idMax"
+      },
+      {
+        "in": "query",
+        "name": "classIn"
+      },
+      {
+        "in": "query",
+        "name": "classOut"
+      },
+      {
+        "in": "query",
+        "name": "titleLike"
+      },
+      {
+        "in": "query",
+        "name": "contentLike"
+      },
+      {
+        "in": "query",
+        "name": "relationsIn"
+      },
+      {
+        "in": "query",
+        "name": "relationsOut"
+      },
+      {
+        "in": "query",
+        "name": "responseFields"
+      },
+      {
+        "in": "query",
+        "name": "sort"
+      },
+      {
+        "in": "query",
+        "name": "limit"
+      }
     ],
-    "getNodes": ["user", "idIn", "idOut", "idMin", "idMax", "classIn", "classOut", "titleLike", "contentLike",
-        "relationsIn", "relationsOut", "responseFields", "sort", "limit"],
-    "editAccess": [
-        "user", "idA", "idB", "rights"
+    "constants": {
+      "flags": [
+        "undefined"
+      ]
+    },
+    "errors": {
+      "access denied:read": {
+        "text": "read: user has no right to read node",
+        "code": "403"
+      },
+      "not found:node": {
+        "text": "node: not found",
+        "code": "404"
+      },
+      "not found:relation": {
+        "text": "relation: node not found",
+        "code": "404"
+      },
+      "invalid parameter:user": {
+        "text": "user: must be a positive integer",
+        "code": "422"
+      },
+      "invalid parameter:idIn": {
+        "text": "idIn: must be a string of integers joined with comma",
+        "code": "422"
+      },
+      "invalid parameter:idOut": {
+        "text": "idOut: must be a string of integers joined with comma",
+        "code": "422"
+      },
+      "invalid parameter:idMin": {
+        "text": "idMin: must be an integer",
+        "code": "422"
+      },
+      "invalid parameter:idMax": {
+        "text": "idMax: must be an integer",
+        "code": "422"
+      },
+      "invalid parameter:classIn": {
+        "text": "classIn: must be a string of words joined with comma",
+        "code": "422"
+      },
+      "invalid parameter:classOut": {
+        "text": "classOut: must be a string of words joined with comma",
+        "code": "422"
+      },
+      "invalid parameter:titleLike": {
+        "text": "titleLike: must be a string",
+        "code": "422"
+      },
+      "invalid parameter:contentLike": {
+        "text": "contentLike: must be a string",
+        "code": "422"
+      },
+      "invalid parameter:relationsIn": {
+        "text": "relationsIn: must be a string of 4-items (string,int,float,float) \"class,id,minValue,maxValue\"",
+        "code": "422"
+      },
+      "invalid parameter:relationsOut": {
+        "text": "relationsOut: must be a string of 4-items (string,int,float,float) \"class,id,minValue,maxValue\"",
+        "code": "422"
+      },
+      "invalid parameter:responseFields": {
+        "text": "responseFields: must be a string of array of Node fields names",
+        "code": "422"
+      },
+      "invalid parameter:sort": {
+        "text": "sort: must be a string: \"asc\" or \"desc\"",
+        "code": "422"
+      },
+      "invalid parameter:limit": {
+        "text": "limit: must be a positive integer",
+        "code": "422"
+      }
+    }
+  },
+  "editNode": {
+    "path": "/node/",
+    "method": "post",
+    "arguments": [
+      {
+        "in": "path",
+        "name": "id"
+      },
+      {
+        "in": "query",
+        "name": "user"
+      },
+      {
+        "in": "query",
+        "name": "operation"
+      },
+      {
+        "in": "body",
+        "name": "class"
+      },
+      {
+        "in": "body",
+        "name": "title"
+      },
+      {
+        "in": "body",
+        "name": "ctype"
+      },
+      {
+        "in": "body",
+        "name": "content"
+      },
+      {
+        "in": "body",
+        "name": "flags"
+      },
+      {
+        "in": "body",
+        "name": "meta"
+      },
+      {
+        "in": "body",
+        "name": "relationsAdd"
+      },
+      {
+        "in": "body",
+        "name": "relationsRm"
+      }
     ],
-    "getAccess": ["user", "idA", "idB"]
+    "constants": {
+      "operations": [
+        "delete",
+        "title",
+        "content",
+        "flags",
+        "meta",
+        "relations"
+      ],
+      "flags": [
+        "undefined"
+      ]
+    },
+    "errors": {
+      "access denied:write": {
+        "text": "write: user has no right to write",
+        "code": "403"
+      },
+      "access denied:delete": {
+        "text": "delete: user has no right to delete",
+        "code": "403"
+      },
+      "access denied:relate": {
+        "text": "relate: user has no right to relate",
+        "code": "403"
+      },
+      "not found:node": {
+        "text": "node: not found",
+        "code": "404"
+      },
+      "not found:relation": {
+        "text": "relation: node not found",
+        "code": "404"
+      },
+      "invalid parameter:id": {
+        "text": "id: must be a positive integer or empty string",
+        "code": "422"
+      },
+      "invalid parameter:user": {
+        "text": "user: must be a positive integer or empty string",
+        "code": "422"
+      },
+      "invalid parameter:class": {
+        "text": "class: must be a string",
+        "code": "422"
+      },
+      "invalid parameter:title": {
+        "text": "title: must be a string",
+        "code": "422"
+      },
+      "invalid parameter:ctype": {
+        "text": "ctype: must be a string",
+        "code": "422"
+      },
+      "invalid parameter:content": {
+        "text": "content: must be a string",
+        "code": "422"
+      },
+      "invalid parameter:flags": {
+        "text": "flags: must be an integer",
+        "code": "422"
+      },
+      "invalid parameter:meta": {
+        "text": "meta: must be a string of valid JSON",
+        "code": "422"
+      },
+      "invalid parameter:relationsAdd or relationsRm": {
+        "text": "relationsAdd or relationsRm: must not be empty",
+        "code": "422"
+      },
+      "invalid parameter:relationsAdd": {
+        "text": "relationsAdd: must be a string of array of 3-items (int,float,float) \"id,localTitle,localValue\"",
+        "code": "422"
+      },
+      "invalid parameter:relationsRm": {
+        "text": "relationsRm: must be a string of integers \"id1,id2,..\"",
+        "code": "422"
+      }
+    }
   },
-  "storageConstants": {
-    "operations": ["delete", "title", "content", "flags", "meta", "relations"],
-    "rights": ["read", "relate", "write", "delete", "create_access_to", "create_access_from"]
+  "getAccess": {
+    "path": "/access",
+    "method": "get",
+    "arguments": [
+      {
+        "in": "query",
+        "name": "user"
+      },
+      {
+        "in": "query",
+        "name": "idA"
+      },
+      {
+        "in": "query",
+        "name": "idB"
+      }
+    ],
+    "constants": {
+      "rights": [
+        "read",
+        "relate",
+        "write",
+        "delete",
+        "create_access_to",
+        "create_access_from"
+      ]
+    },
+    "errors": {
+      "access denied:idA": {
+        "text": "idA: user has no right to see access from",
+        "code": "403"
+      },
+      "access denied:idB": {
+        "text": "idB: user has no right to see access to",
+        "code": "403"
+      },
+      "not found:idA": {
+        "text": "idA: node not found",
+        "code": "404"
+      },
+      "not found:idB": {
+        "text": "idB: node not found",
+        "code": "404"
+      },
+      "invalid parameter:user": {
+        "text": "user: must be a positive integer",
+        "code": "422"
+      },
+      "invalid parameter:idA": {
+        "text": "idA: must be a positive integer",
+        "code": "422"
+      },
+      "invalid parameter:idB": {
+        "text": "idB: must be a positive integer",
+        "code": "422"
+      }
+    }
   },
-  "storageErrors": {
-    "getNodes": {
-      "user": "user must be a positive integer",
-      "idIn": "idIn must be a string of integers joined with comma",
-      "idOut": "idOut must be a string of integers joined with comma",
-      "idMin": "idMin must be an integer",
-      "idMax": "idMax must be an integer",
-      "classIn": "classIn must be a string of words joined with comma",
-      "classOut": "classOut must be a string of words joined with comma",
-      "titleLike": "titleLike must be a string",
-      "contentLike": "contentLike must be a string",
-      "relationsIn": "relationsIn must be a string of multiple of 4 words joined with comma. groups: [word, int, float, float]",
-      "relationsOut": "relationsOut must be a string of multiple of 4 words joined with comma. groups: [word, int, float, float]",
-      "responseFields":  "responseFields must be a string of words joined with comma",
-      "sort": "sort must be a string: 'asc' or 'desc'",
-      "limit": "limit must be a positive integer"
+  "editAccess": {
+    "path": "/access",
+    "method": "post",
+    "arguments": [
+      {
+        "in": "query",
+        "name": "user"
+      },
+      {
+        "in": "query",
+        "name": "idA"
+      },
+      {
+        "in": "query",
+        "name": "idB"
+      },
+      {
+        "in": "query",
+        "name": "rights"
+      }
+    ],
+    "constants": {
+      "rights": [
+        "read",
+        "relate",
+        "write",
+        "delete",
+        "create_access_to",
+        "create_access_from"
+      ]
     },
-    "editNode": {
-      "user": "user must be a positive integer or empty string",
-      "id": "id must be a positive integer or empty string",
-      "no_right_to_write": "user has no right to write",
-      "no_right_to_delete": "user has no right to delete",
-      "no_right_to_relate": "user has no right to relate",
-      "relation_not_found": "relation node not found",
-      "node_not_found": "node not found"
-    },
-    "getAccess": {
-      "user": "user must be a positive integer",
-      "idA": "idA must be a positive integer",
-      "idB": "idB must be a positive integer",
-      "user_has_no_right_to_see_access_from": "user has no right to see access from",
-      "user_has_no_right_to_see_access_to": "user has no right to see access to"
-    },
-    "editAccess": {
-      "user": "user must be a positive integer",
-      "idA": "idA must be a positive integer",
-      "idB": "idB must be a positive integer",
-      "rights": "rights must be not negative integer",
-      "user_has_no_right_to_create_access_from": "user has no right to create access from",
-      "user_has_no_right_to_create_access_to": "user has no right to create access to",
-      "node_not_found": "node not found"
+    "errors": {
+      "access denied:idA": {
+        "text": "idA: user has no right to create access from",
+        "code": "403"
+      },
+      "access denied:idB": {
+        "text": "idB: user has no right to create access to",
+        "code": "403"
+      },
+      "not found:idA": {
+        "text": "idA: node not found",
+        "code": "404"
+      },
+      "not found:idB": {
+        "text": "idB: node not found",
+        "code": "404"
+      },
+      "invalid parameter:user": {
+        "text": "user: must be a positive integer",
+        "code": "422"
+      },
+      "invalid parameter:idA": {
+        "text": "idA: must be a positive integer",
+        "code": "422"
+      },
+      "invalid parameter:idB": {
+        "text": "idB: must be a positive integer",
+        "code": "422"
+      },
+      "invalid parameter:rights": {
+        "text": "rights: must be not negative integer",
+        "code": "422"
+      }
     }
   }
 }
