@@ -282,6 +282,7 @@ paths:
                 enum:
                   - 'id: must be a positive integer or empty string'
                   - 'user: must be a positive integer or empty string'
+                  - 'operation: must be an integer'
                   - 'class: must be a string'
                   - 'title: must be a string'
                   - 'ctype: must be a string'

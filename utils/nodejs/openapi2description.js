@@ -118,9 +118,9 @@ const buildDescriptionForModule = function (name) {
         _openapi = require('../../api/' + name);
     } catch (e) {
         try {
-            _openapi = loadYaml('../../api/' + name + '.yaml');
+            _openapi = loadYaml(__dirname + '/../../api/' + name + '.yaml');
         } catch (e) {
-            _openapi = loadYaml('../../api/' + name + '.yml');
+            _openapi = loadYaml(__dirname + '/../../api/' + name + '.yml');
         }
     }
     if (!_openapi) {

@@ -38,7 +38,9 @@ const start = function (config, options) {
             logger.verbose(msg.clone('query', req.query));
             logger.debug(msg.clone('headers', req.headers));
             when().then(() => {
-                if (req.headers['content-type'].match(/multipart\/form-data/)) {
+                if (req.headers['content-type'] && 
+                    req.headers['content-type'].match(/multipart\/form-data/)
+                ) {
                     const defer = when.defer();
                     const busboy = new Busboy({ headers: req.headers });
                     busboy.on('field', function (field, val, fieldTruncated, valTruncated, encoding, mimetype) {
@@ -56,7 +58,7 @@ const start = function (config, options) {
                 const params = Object.assign({}, req.params, req.query, req.body);
                 const ar = [];
                 for (let p = 0; p < methodParams.length; p++) {
-                    ar.push(params[methodParams[p].name]);
+                    ar.push(params[methodParams[p].name] == undefined ? null : params[methodParams[p].name]);
                 }
                 logger.debug(msg.clone('what', 'call storage', 'args', ar));
                 return storage[method](...ar);
@@ -67,19 +69,20 @@ const start = function (config, options) {
                 const startMultipart = () => {
                     if (!isMultipart) {
                         form = new FormData();
-                        res.set('Content-Type', 'multipart/form-data; charset=utf-8; boundary=' + form._boundary);
                         isMultipart = true;
-                        form.pipe(res);
                     }
                 };
                 const toBody = (_result) => {
                     startMultipart();
                     if (Array.isArray(_result)) {
                         for (let i = 0; i < _result.length; i++) {
+                            form.append('rownum', i);
                             toBody(_result[i]);
                         }
                         return;
                     }
+                    let key;
+                    let val;
                     if (typeof _result == 'object') {
                         for ([key, val] of Object.entries(_result)) {
                             form.append(key, val);
@@ -89,23 +92,28 @@ const start = function (config, options) {
                     }
                 };
                 res.status(200);
+                logger.info(msg.clone('code', 200));
+                logger.debug(msg.clone('result', result));
                 if (typeof result == 'object') {
                     toBody(result);
                 } else {
                     res.set('Content-Type', 'text/plain; charset=utf-8');
-                    res.write(result);
+                    res.write(typeof result != 'string' ? JSON.stringify(result) : result);
                 }
                 if (isMultipart) {
-                    form.end();
+                    res.set('Content-Type', 'multipart/form-data; charset=utf-8; boundary=' + form._boundary);
+                    form.pipe(res);
                 } else {
                     res.end();
                 }
+                logger.debug(msg.clone('headers', res.getHeaders()));
             })
             .catch((e) => {
                 const error = description[method].errors[e.message];
                 if (error) {
                     res.status(error.code).send(error.text);
                 } else {
+                    logger.error(e.stack);
                     res.status(500).send('unexpected error: ' + e.mesage);
                 }
             });

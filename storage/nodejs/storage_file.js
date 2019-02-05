@@ -42,7 +42,9 @@ module.exports = (config) => {
         :
         new NeDB();
 
-    const logger = config && config.logger ? config.logger : require('../../utils/nodejs/console_logger').get('storage');
+    const logger = config && config.logger ? 
+        config.logger : 
+        require('../../utils/nodejs/console_logger').get('storage');
 
     /* HELPERS */
 
@@ -394,6 +396,7 @@ module.exports = (config) => {
                 checkingParam = 'id';
                 id = JSON.parse(id || 'null');
                 checkingParam = 'operation';
+                operation = JSON.parse(operation);
                 assert(operation != null, '"operation" cannot be null');
                 if (operationHas.title(operation)) {
                     checkingParam = 'title';
@@ -407,6 +410,7 @@ module.exports = (config) => {
                 }
                 if (operationHas.flags(operation)) {
                     checkingParam = 'flags';
+                    flags = JSON.parse(flags);
                     assert(flags != null, '"flags" cannot be null');
                     assert.equal(typeof flags, 'number', 'typeof "flags" must be number');
                 }
@@ -425,9 +429,9 @@ module.exports = (config) => {
                         checkingParam = 'relationsAdd';
                         for (let i = 0; i < relationsAdd.length / 3; i++) {
                             const rId = relationsAdd[3*i + 0] = JSON.parse(relationsAdd[3*i + 0]);
-                            const rTitle = relationsAdd[3*i + 1] = decodeURIComponent(relationsAdd[3*i + 1]);
+                            const rTitle = relationsAdd[3*i + 1] = relationsAdd[3*i + 1];
                             const rValue = relationsAdd[3*i + 2] = parseFloat(
-                                decodeURIComponent(relationsAdd[3*i + 2]), 10) || undefined;
+                                relationsAdd[3*i + 2], 10) || undefined;
                             assert.equal(typeof rId, 'number', '"relation" id must be number');
                             assert(rId != id, 'node cant relate to itself');
                         }

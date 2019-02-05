@@ -227,6 +227,10 @@
         "text": "user: must be a positive integer or empty string",
         "code": "422"
       },
+      "invalid parameter:operation": {
+        "text": "operation: must be an integer",
+        "code": "422"
+      },
       "invalid parameter:class": {
         "text": "class: must be a string",
         "code": "422"

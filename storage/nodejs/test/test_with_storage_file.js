@@ -5,7 +5,7 @@ const assert = require('assert');
 const description = require('../../description');
 
 // require('../../../utils/nodejs/console_logger').get('storage').setLevel('debug');
-const logger = require('../../../utils/nodejs/console_logger').get('tester').setLevel('debug');
+const logger = require('../../../utils/nodejs/console_logger').get('tester');
 
 const FormData = require('form-data');
 const http = require('http');
@@ -61,17 +61,17 @@ describe('Storage main test', function() {
                     const argsNames = descr.arguments;
                     for (let p = 0; p < argsNames.length; p++) {
                         if (argsNames[p].in == 'path') {
-                            path += step.params[argsNames[p].name];
+                            path += encodeURIComponent(step.params[argsNames[p].name]);
                         }
-                        if (argsNames[p].in == 'query') {
-                            query += `${argsNames[p].name}=${step.params[argsNames[p].name]}&`;
+                        if (argsNames[p].in == 'query' && step.params[argsNames[p].name] != undefined) {
+                            query += `${argsNames[p].name}=${encodeURIComponent(step.params[argsNames[p].name])}&`;
                         }
-                        if (argsNames[p].in == 'body') {
+                        if (argsNames[p].in == 'body' && step.params[argsNames[p].name] != null) {
                             body[argsNames[p].name] = step.params[argsNames[p].name];
                         }
                     }
 
-                    logger.verbose(descr.method, path, query);
+                    logger.verbose(descr.method, path+query);
                     const defer = when.defer();
                     const req = http.request({
                         method: descr.method,
@@ -87,41 +87,44 @@ describe('Storage main test', function() {
                     if (Object.keys(body).length > 0) {
                         logger.verbose(JSON.stringify(body));
                         const form = new FormData();
-                        req.setHeader('Content-Type', 'multipart/form-data; boundary='+form._boundary);
-                        form.pipe(req);
                         for (const key in body) {
                             form.append(key, body[key]);
                         }
-                        form.end();
+                        req.setHeader('content-type', 'multipart/form-data; boundary='+form._boundary);
+                        form.pipe(req);
                     } else {
+                        req.setHeader('content-type', 'text/plain');
                         req.end();
                     }
                     defer.promise
                     .then((res) => {
+                        const result = {
+                            code: res.statusCode,
+                            body: null
+                        };
                         const defer = when.defer();
                         res.setEncoding('utf8');
-                        let result;
                         if (res.headers['content-type'].match(/multipart\/form-data/)) {
                             const busboy = new Busboy({ headers: res.headers });
-                            result = [];
+                            result.body = [];
                             let tmp = {};
                             busboy.on('field', function (field, val, fieldTruncated, valTruncated, encoding, mimetype) {
                                 if (tmp[field] == undefined) {
                                     tmp[field] = val;
                                 } else {
-                                    result.push(tmp);
+                                    result.body.push(tmp);
                                     tmp = {};
                                 }
                             });
                             busboy.on('finish', function() {
-                                if (Object.keys(tmp).length > 0) result.push(tmp);
+                                if (Object.keys(tmp).length > 0) result.body.push(tmp);
                                 defer.resolve(result);
                             });
                             res.pipe(busboy);
                         } else {
-                            result = '';
+                            result.body = '';
                             res.on('data', (chunk) => {
-                                result += chunk;
+                                result.body += chunk;
                             });
                             res.on('end', function () {
                                 defer.resolve(result);
@@ -130,17 +133,21 @@ describe('Storage main test', function() {
                         return defer.promise;
                     })
                     .then((res) => {
-                        console.log(res);
+                        logger.debug('result:', JSON.stringify(res));
+                        // better check code than 'error'
+                        if (res.code != 200) {
+                            throw new Error('not 200');
+                        }
                         if (step.result.value != null) {
-                            assert.equal(res, step.result.value);
+                            assert.equal(res.body, step.result.value);
                         }
                         if (step.result.length != null) {
-                            assert.equal(res.length, step.result.length);
+                            assert.equal(res.body.length, step.result.length);
                         }
                         if (step.result.checkArray != null) {
                             for (const k in step.result.checkArray) {
                                 for (const key in step.result.checkArray[k]) {
-                                    assert.deepEqual(res[k][key], step.result.checkArray[k][key]);
+                                    assert.deepEqual(res.body[k][key], step.result.checkArray[k][key]);
                                 }
                             }
                         }
