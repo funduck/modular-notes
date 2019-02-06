@@ -1,4 +1,11 @@
 {
+  "clear": {
+    "path": "/nodes",
+    "method": "delete",
+    "arguments": [],
+    "constants": {},
+    "errors": {}
+  },
   "getNodes": {
     "path": "/nodes",
     "method": "get",

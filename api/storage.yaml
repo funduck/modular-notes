@@ -16,6 +16,30 @@ servers:
     description: local
 paths:
   /nodes:
+    delete:
+      summary: ""
+      description: "Returns number of removed records"
+      tags:
+        - write
+      operationId: clear
+      200:
+        description: ok
+        content:
+          text/plain:
+            schema:
+              type: integer
+      403:
+        description: forbidden
+        content:
+          text/plain:
+            schema:
+              type: string
+              enum:
+                - 'forbidden'
+      500:
+        $ref: '#/components/responses/internal_error'
+      503:
+        $ref: '#/components/responses/temporarily_unavailable'
     get:
       summary: ""
       description: "Returns list of found Nodes to which User has access"

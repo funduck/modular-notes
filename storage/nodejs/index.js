@@ -3,7 +3,7 @@
 const when = require('when');
 const Busboy = require('busboy');
 
-const mainConfig = require('../config');
+let mainConfig = {};
 const logger = require('../../utils/nodejs/console_logger').get('storage');
 const Messages = require('../../utils/nodejs/messages');
 const Message = Messages.Message;
@@ -123,6 +123,20 @@ const start = function (config, options) {
     app.get('/access', callback('getAccess'));
     app.post('/node/:id', callback('editNode'));
     app.post('/access', callback('editAccess'));
+    
+    app.delete('/nodes', (req, res) => {
+        if (!config.test) {
+            return res.status(403).send('forbidden');
+        }
+        module.exports.storage.clear()
+        .then((num) => {
+            res.status(200).send(String(num));
+        })
+        .catch((e) => {
+            logger.error(e.stack);
+            res.status(500).send('unexpected error: ' + e.mesage);
+        }); 
+    });
 
     module.exports.server = app.listen(port, () => {
         logger.info(new Message('where', 'server', 'what', 'listening', 'port', port));
@@ -131,5 +145,15 @@ const start = function (config, options) {
 module.exports.start = start;
 
 if (process.argv[1].indexOf(module.filename) >= 0) {
+    mainConfig = require('../config');
+    let i = 2;
+    while (i < process.argv.length) {
+        switch (process.argv[i]) {
+            case '--test': {
+                mainConfig = require('../test/config');
+            }
+        }
+        i++;
+    }
     start();
 }

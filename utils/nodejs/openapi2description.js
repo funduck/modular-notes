@@ -72,8 +72,10 @@ const buildDescription = function (openapi) {
                 constants: {},
                 errors: {}
             };
-            for (let i = 0; i < operation.parameters.length; i++) {
-                res[method].arguments.push({in:operation.parameters[i].in, name: operation.parameters[i].name});
+            if (operation.parameters) {
+                for (let i = 0; i < operation.parameters.length; i++) {
+                    res[method].arguments.push({in:operation.parameters[i].in, name: operation.parameters[i].name});
+                }
             }
             if (operation.requestBody &&
                 operation.requestBody.content['multipart/form-data'] &&
@@ -132,8 +134,11 @@ const buildDescriptionForModule = function (name) {
 // Reading all available apis
 const apis = fs.readdirSync(__dirname + '/../../api/');
 for (const i in apis) {
-    const name = apis[i].match(/^(.*)\.(json|yaml|yml)/)[1];
-    module.exports[name] = buildDescriptionForModule(name);
+    let name = apis[i].match(/^(.*)\.(json|yaml|yml)/);
+    if (name) {
+        name = name[1];
+        module.exports[name] = buildDescriptionForModule(name);
+    }
 }
 
 if (process.argv[1] == module.filename) {

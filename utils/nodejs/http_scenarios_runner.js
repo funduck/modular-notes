@@ -1,54 +1,66 @@
 'use strict';
 
+const moduleName = process.env.MN_TESTING_MODULE;
+const implementation = process.env.MN_TESTING_IMPLEMENTATION;
+
 const when = require('when');
 const assert = require('assert');
-const description = require('../../description');
+const description = require('../../' + moduleName + '/description');
 
-// require('../../../utils/nodejs/console_logger').get('storage').setLevel('debug');
-const logger = require('../../../utils/nodejs/console_logger').get('tester');
+require('./console_logger').get(moduleName).setLevel('fatal');
+const logger = require('./console_logger').get('tester');
 
 const FormData = require('form-data');
 const http = require('http');
 const Busboy = require('busboy');
 
 const fs = require('fs');
-const dataFiles = fs.readdirSync(__dirname + '/../../test/scenarios');
+const dataFiles = fs.readdirSync(__dirname + '/../../' + moduleName + '/test/scenarios');
 const scenarios = [];
 for (const i in dataFiles) {
-    scenarios.push(require('../../test/scenarios/' + dataFiles[i]));
+    scenarios.push(require('../../' + moduleName + '/test/scenarios/' + dataFiles[i]));
 }
-const main = require('../index');
-const PORT = 8001;
 
-describe('Storage main test', function() {
-    before(() => {
-        main.start({
-            port: PORT,
-            storage: {file: {}}
-        }, {
-            storage: 'file'
-        });
-    });
+const PORT = require('../../' + moduleName + '/test/config').port;
 
+describe('Test module: ' + moduleName.toUpperCase() + '/' + implementation.toUpperCase() + 
+' http interface on port: ' + PORT, function() {
+    
     after((done) => {
-        main.storage.clear()
-        .then(() => {
-            main.server.close(() => {
+        const req = http.request({
+            method: 'DELETE',
+            host: '127.0.0.1',
+            port: PORT,
+            path: '/nodes'
+        }, (res) => {
+            if (res.statusCode == '200') {
                 done();
-            });
-        })
-        .catch(done);
+            } else {
+                done(new Error(res.statusCode));
+            }
+        });
+        req.on('error', done);
+        req.end();
     });
 
     for (let i = 0; i < scenarios.length; i++) {
         const scenario = scenarios[i];
         describe('scenario: ' + scenario.title, function() {
             before((done) => {
-                main.storage.clear()
-                .then(() => {
-                    done();
-                })
-                .catch(done);
+                const req = http.request({
+                    method: 'DELETE',
+                    host: '127.0.0.1',
+                    port: PORT,
+                    path: '/nodes'
+                }, (res) => {
+                    if (res.statusCode == '200') {
+                        done();
+                    } else {
+                        done(new Error(res.statusCode));
+                    }
+                });
+                req.on('error', done);
+                req.end();
             });
             for (let j = 0; j < scenario.steps.length; j++) {
                 const step = scenario.steps[j];

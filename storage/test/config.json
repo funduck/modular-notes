@@ -1,0 +1,9 @@
+{
+  "log_level": "verbose",
+  "port": 8001,
+  "test": true,
+  "storage": {
+    "file": {
+    }
+  }
+}
