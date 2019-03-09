@@ -3,13 +3,10 @@
 /*
     This module builds a 'description' from OpenAPI document. It also can read YAML.
 
-    To rebuild for all modules thir description.json run:
-    node openapi2description.js update-all
-
     We describe API in OpenAPI document and that is good format to share with others.
     But we want more and there are some rules must be applied to OpenAPI doc:
     * We describe arguments of a function handling a request:
-        1 query parameters are first and their order in  call is the same as in OpenAPI doc.
+        1 query parameters are first and their order in call is the same as in OpenAPI doc.
         2 parameters in body MUST have 'description' starting with number to provide order of all arguments for a function.
             They always follow query parameters.
             Examples:
@@ -32,21 +29,21 @@
 
     'Description' is a document to be used in sources, looks like this:
     {
-        methods: {
-            method1: {
-                arguments: ['arg1', 'arg2', ...], // array of method1 arguments names
-                constants: { // constants used in method1
-                    operations: ...,
-                    ...
+        method1: {
+            path: '/method1',
+            method: 'post',
+            arguments: ['arg1', 'arg2', ...], // array of method1 arguments names
+            constants: { // constants used in method1
+                operations: ...,
+                ...
+            },
+            errors: { // errors thrown in method1
+                'access denied:read': {
+                    text: 'read: user has no right to read node',
+                    code: 422
                 },
-                errors: { // errors thrown in method1
-                    'access denied:read': {
-                        text: 'read: user has no right to read node',
-                        code: 422
-                    },
-                    'access denied:write',
-                    ...
-                }
+                'access denied:write',
+                ...
             }
         }
     }
@@ -114,16 +111,12 @@ const buildDescription = function (openapi) {
     return res;
 };
 
-const buildDescriptionForModule = function (name) {
+const buildDescriptionForFile = function (filepath) {
     let _openapi;
     try {
-        _openapi = require('../../api/' + name);
-    } catch (e) {
-        try {
-            _openapi = loadYaml(__dirname + '/../../api/' + name + '.yaml');
-        } catch (e) {
-            _openapi = loadYaml(__dirname + '/../../api/' + name + '.yml');
-        }
+        _openapi = require(filepath);
+    } catch (e) {    
+        _openapi = loadYaml(filepath);
     }
     if (!_openapi) {
         throw new Error('failed to load api: ' + name);
@@ -131,56 +124,7 @@ const buildDescriptionForModule = function (name) {
     return buildDescription(_openapi);
 };
 
-// Reading all available apis
-const apis = fs.readdirSync(__dirname + '/../../api/');
-for (const i in apis) {
-    let name = apis[i].match(/^(.*)\.(json|yaml|yml)/);
-    if (name) {
-        name = name[1];
-        module.exports[name] = buildDescriptionForModule(name);
-    }
-}
-
 if (process.argv[1] == module.filename) {
-    if (process.argv[2] == 'update' && process.argv[3] != null) {
-        const name = process.argv[3];
-        if (!module.exports[name]) {
-            console.error('api not found for module: ' + name);
-            process.exit(-1);
-        }
-        const file = __dirname + '/../../' + name + '/description.json';
-        console.log('writing', file);
-        fs.writeFileSync(
-            file,
-            JSON.stringify(module.exports[name], null, '  '),
-            {encoding: 'utf-8'}
-        );
-        return;
-    }
-    if (process.argv[2] == 'update-all') {
-        for (const name in module.exports) {
-            const file = __dirname + '/../../' + name + '/description.json';
-            console.log('writing', file);
-            fs.writeFileSync(
-                file,
-                JSON.stringify(module.exports[name], null, '  '),
-                {encoding: 'utf-8'}
-            );
-        }
-        return;
-    }
-
-    // Test
-    const assert = require('assert');
-    const openapiJson = loadYaml('../../api/storage.yaml');
-    //console.log(JSON.stringify(buildDescription(openapiJson), null, '  '));
-    //console.log(JSON.stringify(require('../../storage/description'), null, '  '));
-    try {
-        assert.deepEqual(
-            buildDescription(openapiJson),
-            require('../../storage/description')
-        );
-    } catch (e) {
-        console.log(e)
-    }
+    const filepath = process.argv[2];
+    console.log(JSON.stringify(buildDescriptionForFile(filepath), null, '  '));    
 }

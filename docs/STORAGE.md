@@ -3,14 +3,18 @@ It is protected internal server providing access to storage without any security
 [Get Nodes](#get-nodes)  
 [Edit Node](#edit-node)  
 [Get Access](#get-access)  
-[Edit Access](#edit-access)
+[Edit Access](#edit-access)  
+[Clear](#clear)
+
+# OpenApi
+[documentation](../api/storage.yaml)
 
 # HTTP REST API
 ## Get Nodes
 ### Request
 to get one
 
-    GET /nodes?user=<**user**>&responseFields=<**responseFields**>
+    GET /nodes?user=<**user**>&idIn=<**idIn**>&responseFields=<**responseFields**>
 
 to get multiple or search with paging
 
@@ -25,6 +29,7 @@ to get multiple or search with paging
 
 Returned will be *Nodes* for which User has access 'read'.
 If **idIn** were in request and user doesn't have access to even one *Node* then request fails with error.
+Why there is `GET /nodes/<**id**>` allowed? Combination of **idIn** & **idOut** is clear and strict, otherwise there would be possible to make ambiguous requests like `GET /nodes/1,2?idIn=1,2,3` - which ids are meant `1,2` or `1,2,3`? Get rid of **idIn**? I think it is better to have couples of parameters like **\<something\>In** & **\<something\>Out**.
 
 #### Parameters
 * int **user**
@@ -307,3 +312,18 @@ Codes:
 Request
 
     POST /access?user=1&from=35&to=39&rights=5
+
+## Clear
+### Request
+    DELETE /nodes
+
+Method is required for tests and should work only in testing environment
+
+### Response
+Body:
+* plain/text ok
+* plain/text error message
+
+Codes:
+* 200 - ok
+* 403 - forbidden

@@ -1,2 +1,3 @@
 # API descriptions for all modules 
-in OpenAPI format
+* OpenAPI format
+* modules use these documents, but not directly, they have `description.json` built from these files.
