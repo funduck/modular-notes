@@ -1,0 +1,36 @@
+inherits:
+  $ref: "./storage.yaml"
+  paths:
+    /nodes: true
+    /node/{id}: true
+    /access: true
+  operations: true
+  components: true
+  tags: true
+  x-method-constants: true
+openapi: "3.0.2"
+info:
+  title: Modular Notes Server
+  description: ""
+  termsOfService: ""
+  contact:
+    name: developer
+    url: example.com
+    email: support@example.com
+  license:
+    name: ""
+    url: ""
+  version: "1"
+servers:
+  - url: localhost:9002
+    description: local
+paths:
+  /nodes:
+    delete:
+      parameters:
+        - name: user
+          description: User performing request
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/queryInt'

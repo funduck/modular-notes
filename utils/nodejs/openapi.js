@@ -1,7 +1,60 @@
 'use strict';
 
 /*
-    This module builds a 'description' from OpenAPI document. It also can read YAML.
+    This module applies custom operators to OpenAPI document and returns valid standart
+*/
+
+const yaml = require('js-yaml');
+const fs = require('fs');
+const lodash = require('lodash');
+
+const loadYaml = function (filename) {
+    return yaml.safeLoad(fs.readFileSync(filename, 'utf8'));
+};
+
+const toYaml = function (doc) {
+    return yaml.safeDump(doc, {
+        lineWidth: 120,
+        noRefs: true
+    });
+};
+
+/*
+    Applies custom 'rules' to openapi doc
+    Returns standart OpenAPI
+*/
+const compile = function (openapi, filepath) {
+    if (openapi.inherits) {
+        if (openapi.inherits.$ref) {
+            let ref;
+            filepath = require('path').dirname(filepath) + '/' + openapi.inherits.$ref;
+            try {
+                ref = require(filepath);
+            } catch (e) {    
+                ref = loadYaml(filepath);
+            }
+            if (!ref) {
+                throw new Error('failed to load $ref: ' + openapi.inherits.$ref);
+            }
+            for (const key in openapi.inherits) {
+                if (key == '$ref') continue;
+                if (openapi.inherits[key] == true) {
+                    openapi[key] = lodash.merge(ref[key], openapi[key]);
+                } else {
+                    openapi[key] = openapi[key] || {};
+                    for (const k in openapi.inherits[key]) {
+                        openapi[key][k] = lodash.merge(ref[key][k], openapi[key][k]);
+                    }
+                }
+            }
+        }
+        delete openapi.inherits;
+    }
+    return openapi;
+};
+
+/*
+    Following procedure builds a 'description' from OpenAPI document.
 
     We describe API in OpenAPI document and that is good format to share with others.
     But we want more and there are some rules must be applied to OpenAPI doc:
@@ -48,15 +101,7 @@
         }
     }
 */
-
-const yaml = require('js-yaml');
-const fs = require('fs');
-
-const loadYaml = function (filename) {
-    return yaml.safeLoad(fs.readFileSync(filename, 'utf8'));
-};
-
-const buildDescription = function (openapi) {
+const description = function (openapi) {
     const res = {};
     for (const p in openapi.paths) {
         for (const m in openapi.paths[p]) {
@@ -96,6 +141,7 @@ const buildDescription = function (openapi) {
                     const texts = operation.responses[code].content['text/plain'].schema.enum;
                     const descr = operation.responses[code].description;
                     for (let i = 0; i < texts.length; i++) {
+//                        console.log(texts[i])
                         res[method].errors[descr+':'+texts[i].match(/^([\w ]+):/)[1]] = {
                             text: texts[i],
                             code: code
@@ -111,8 +157,11 @@ const buildDescription = function (openapi) {
     return res;
 };
 
-const buildDescriptionForFile = function (filepath) {
+if (process.argv[1] == module.filename) {
+    const command  = process.argv[2];
+    const filepath = process.argv[3];
     let _openapi;
+    let yaml = command.match(/-yaml/) != null;
     try {
         _openapi = require(filepath);
     } catch (e) {    
@@ -121,10 +170,22 @@ const buildDescriptionForFile = function (filepath) {
     if (!_openapi) {
         throw new Error('failed to load api: ' + name);
     }
-    return buildDescription(_openapi);
-};
-
-if (process.argv[1] == module.filename) {
-    const filepath = process.argv[2];
-    console.log(JSON.stringify(buildDescriptionForFile(filepath), null, '  '));    
+    let res;
+    switch (command) {
+        case 'compile-yaml':
+        case 'compile-json':
+        case 'compile': {
+            res = compile(_openapi, filepath);
+            break;
+        }
+        case 'description': {
+            res = description(_openapi);
+            break;
+        }
+    }
+    if (yaml) {
+        console.log(toYaml(res));    
+    } else {
+        console.log(JSON.stringify(res, null, '  '));    
+    }
 }

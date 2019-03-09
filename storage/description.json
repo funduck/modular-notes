@@ -4,7 +4,12 @@
     "method": "delete",
     "arguments": [],
     "constants": {},
-    "errors": {}
+    "errors": {
+      "access denied:reason": {
+        "text": "reason: not allowed",
+        "code": "403"
+      }
+    }
   },
   "getNodes": {
     "path": "/nodes",
