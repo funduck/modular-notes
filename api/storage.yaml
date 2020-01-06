@@ -201,7 +201,7 @@ paths:
                   - 'contentLike: must be a string'
                   - 'relationsIn: must be a string of 4-items (string,int,float,float) "class,id,minValue,maxValue"'
                   - 'relationsOut: must be a string of 4-items (string,int,float,float) "class,id,minValue,maxValue"'
-                  - 'responseFields: must be a string of array of Node fields names'
+                  - 'responseFields: must be a string of Node field names joined with comma'
                   - 'sort: must be a string: "asc" or "desc"'
                   - 'limit: must be a positive integer'
         '500':

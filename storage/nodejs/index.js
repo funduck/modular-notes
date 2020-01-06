@@ -141,10 +141,18 @@ const start = function (config, options) {
     module.exports.server = app.listen(port, () => {
         logger.info(new Message('where', 'server', 'what', 'listening', 'port', port));
     });
+
+    process.once('SIGINT', () => {
+        logger.info(new Message('where', 'server', 'what', 'unref'));
+        module.exports.server.unref();
+        logger.info(new Message('where', 'server', 'what', 'close'));
+        module.exports.server.close();
+    });
 };
+
 module.exports.start = start;
 
-if (process.argv[1].indexOf(module.filename) >= 0) {
+if (process.argv[1] == __filename) {
     mainConfig = require('../config');
     let i = 2;
     while (i < process.argv.length) {
