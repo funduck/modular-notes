@@ -3,3 +3,4 @@ package-lock.json
 */nodejs/*/node_modules/*
 */nodejs/coverage
 */nodejs/.nyc_output
+*.swp

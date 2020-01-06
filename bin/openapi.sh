@@ -24,7 +24,7 @@ case "$command" in
           module=`echo $f | sed 's/.*\/\([^\.]*\)\..*/\1/'`
           [ -d $root/$module ] && { \
             echo "for $f building $root/api/$module.yaml"
-            node $root/utils/nodejs/openapi-compose/index.js compile-yaml $f > $root/api/$module.yaml
+            node $root/utils/nodejs/openapi.js compile-yaml $f > $root/api/$module.yaml
           } || echo "module '$module' not exists"
         done
       ;;
@@ -34,7 +34,7 @@ case "$command" in
         do
           [ -d $root/$module ] && { \
             echo "for $f building $root/api/$module.yaml"
-            node $root/utils/nodejs/openapi-compose/index.js compile-yaml $f > $root/api/$module.yaml
+            node $root/utils/nodejs/openapi.js compile-yaml $f > $root/api/$module.yaml
           } || echo "module '$module' not exists"
         done
       ;;
@@ -49,7 +49,7 @@ case "$command" in
           module=`echo $f | sed 's/.*\/\([^\.]*\)\..*/\1/'`
           [ -d $root/$module ] && { \
             echo "for $f building $root/$module/description.json"
-            node $root/utils/nodejs/openapi-compose/index.js description $f > $root/$module/description.json
+            node $root/utils/nodejs/openapi.js description $f > $root/$module/description.json
           } || echo "module '$module' not exists"
         done
       ;;
@@ -59,7 +59,7 @@ case "$command" in
         do
           [ -d $root/$module ] && { \
             echo "for $f building $root/$module/description.json"
-            node $root/utils/nodejs/openapi-compose/index.js description $f > $root/$module/description.json
+            node $root/utils/nodejs/openapi.js description $f > $root/$module/description.json
           } || echo "module '$module' not exists"
         done
       ;;

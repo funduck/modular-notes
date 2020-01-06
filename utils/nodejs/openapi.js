@@ -1,59 +1,31 @@
 'use strict';
 
 /*
-    This module applies custom operators to OpenAPI document and returns valid standart
+    This module can
+    * load - load JSON or YAML OpenAPI document
+    * compile - eliminate $refs to other files and apply custom operators like '$inherits'
+    * toJSON/toYAML - convert to JSON or YAML
+    * description - convert to object describing API that can be used in sources of service. It will be smaller and more simple.
+
+    Also module has command line interface
 */
 
+const jybid = require('jybid');
 const yaml = require('js-yaml');
-const fs = require('fs');
-const lodash = require('lodash');
+const path = require('path');
 
-const loadYaml = function (filename) {
-    return yaml.safeLoad(fs.readFileSync(filename, 'utf8'));
-};
-
-const toYaml = function (doc) {
+const toYAML = function (doc) {
     return yaml.safeDump(doc, {
         lineWidth: 120,
         noRefs: true
     });
 };
 
-/*
-    Applies custom 'rules' to openapi doc
-    Returns standart OpenAPI
-*/
-const compile = function (openapi, filepath) {
-    if (openapi.inherits) {
-        if (openapi.inherits.$ref) {
-            let ref;
-            filepath = require('path').dirname(filepath) + '/' + openapi.inherits.$ref;
-            try {
-                ref = require(filepath);
-            } catch (e) {    
-                ref = loadYaml(filepath);
-            }
-            if (!ref) {
-                throw new Error('failed to load $ref: ' + openapi.inherits.$ref);
-            }
-            for (const key in openapi.inherits) {
-                if (key == '$ref') continue;
-                if (openapi.inherits[key] == true) {
-                    openapi[key] = lodash.merge(ref[key], openapi[key]);
-                } else {
-                    openapi[key] = openapi[key] || {};
-                    for (const k in openapi.inherits[key]) {
-                        openapi[key][k] = lodash.merge(ref[key][k], openapi[key][k]);
-                    }
-                }
-            }
-        }
-        delete openapi.inherits;
-    }
-    return openapi;
+const toJSON = function (doc) {
+    return JSON.stringify(doc, null, '  ');
 };
 
-/*
+/**
     Following procedure builds a 'description' from OpenAPI document.
 
     We describe API in OpenAPI document and that is good format to share with others.
@@ -100,6 +72,8 @@ const compile = function (openapi, filepath) {
             }
         }
     }
+    @param {object} openapi
+    @return {object}
 */
 const description = function (openapi) {
     const res = {};
@@ -141,8 +115,9 @@ const description = function (openapi) {
                     const texts = operation.responses[code].content['text/plain'].schema.enum;
                     const descr = operation.responses[code].description;
                     for (let i = 0; i < texts.length; i++) {
-//                        console.log(texts[i])
-                        res[method].errors[descr+':'+texts[i].match(/^([\w ]+):/)[1]] = {
+//console.error('texts:', texts[i])
+                        const reason = texts[i].match(/^([\w ]+):?/)[1];
+                        res[method].errors[descr+':'+reason] = {
                             text: texts[i],
                             code: code
                         }
@@ -159,33 +134,40 @@ const description = function (openapi) {
 
 if (process.argv[1] == module.filename) {
     const command  = process.argv[2];
-    const filepath = process.argv[3];
-    let _openapi;
-    let yaml = command.match(/-yaml/) != null;
-    try {
-        _openapi = require(filepath);
-    } catch (e) {    
-        _openapi = loadYaml(filepath);
-    }
-    if (!_openapi) {
-        throw new Error('failed to load api: ' + name);
-    }
-    let res;
+    const filepath = process.argv[3] ? path.resolve(__dirname, process.argv[3]) : null;
+
     switch (command) {
-        case 'compile-yaml':
+        case 'compile':
         case 'compile-json':
-        case 'compile': {
-            res = compile(_openapi, filepath);
-            break;
-        }
-        case 'description': {
-            res = description(_openapi);
+        case 'compile-yaml':
+        case 'to-json':
+        case 'to-yaml':
+        case 'description': break;
+        case '-h':
+        case '--help': {
+            console.log('Usage: node index.js COMMAND FILE');
+            console.log('Commands: compile, compile-yaml, compile-json, description, to-json, to-yaml');
+            return;
             break;
         }
     }
-    if (yaml) {
-        console.log(toYaml(res));    
-    } else {
-        console.log(JSON.stringify(res, null, '  '));    
-    }
+
+    jybid.dereference(filepath, {inherit: true})
+    .then((doc) => {
+        let res;
+        switch (command) {
+            case 'description': {
+                res = description(doc);
+                break;
+            }
+        }
+        if (command.match(/-yaml/) != null) {
+            console.log(toYAML(res));
+        } else {
+            console.log(toJSON(res));
+        }
+    })
+    .catch((e) => {
+        console.error(e.stack);
+    });
 }

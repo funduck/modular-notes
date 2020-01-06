@@ -8,6 +8,14 @@
       "access denied:reason": {
         "text": "reason: not allowed",
         "code": "403"
+      },
+      "internal error:something bad happened": {
+        "text": "something bad happened",
+        "code": "500"
+      },
+      "temporarily unavailable:temporarily unavailable": {
+        "text": "temporarily unavailable",
+        "code": "503"
       }
     }
   },
@@ -145,6 +153,14 @@
       "invalid parameter:limit": {
         "text": "limit: must be a positive integer",
         "code": "422"
+      },
+      "internal error:something bad happened": {
+        "text": "something bad happened",
+        "code": "500"
+      },
+      "temporarily unavailable:temporarily unavailable": {
+        "text": "temporarily unavailable",
+        "code": "503"
       }
     }
   },
@@ -278,6 +294,14 @@
       "invalid parameter:relationsRm": {
         "text": "relationsRm: must be a string of integers \"id1,id2,..\"",
         "code": "422"
+      },
+      "internal error:something bad happened": {
+        "text": "something bad happened",
+        "code": "500"
+      },
+      "temporarily unavailable:temporarily unavailable": {
+        "text": "temporarily unavailable",
+        "code": "503"
       }
     }
   },
@@ -336,6 +360,14 @@
       "invalid parameter:idB": {
         "text": "idB: must be a positive integer",
         "code": "422"
+      },
+      "internal error:something bad happened": {
+        "text": "something bad happened",
+        "code": "500"
+      },
+      "temporarily unavailable:temporarily unavailable": {
+        "text": "temporarily unavailable",
+        "code": "503"
       }
     }
   },
@@ -402,6 +434,14 @@
       "invalid parameter:rights": {
         "text": "rights: must be not negative integer",
         "code": "422"
+      },
+      "internal error:something bad happened": {
+        "text": "something bad happened",
+        "code": "500"
+      },
+      "temporarily unavailable:temporarily unavailable": {
+        "text": "temporarily unavailable",
+        "code": "503"
       }
     }
   }
