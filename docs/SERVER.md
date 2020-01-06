@@ -4,8 +4,11 @@
 * https - TODO
 * web socket - TODO
 
-Also Server may include Index and therefore use it when proxying requests to Storage.  
+Also Server may include Index and use it when proxying requests to Storage.  
 TODO May be it will have some additional functionality based on StorageAPI?
+
+# OpenApi
+[documentation](../api/server.yaml)
 
 # HTTP REST API
 ## Access control methods
@@ -40,7 +43,7 @@ Returns list of active sessions in response body multipart/form-data
         --aBoundaryString--
 
 ### Logout
-    POST /logout?user=<**user**>&session=<**sessionIds**>
+    DELETE /sessions?user=<**user**>&session=<**sessionIds**>
 
 * string **sessionIds** - comma separated session ids. If empty - session is found by provided *Access-Token*
 
@@ -64,7 +67,7 @@ Example
     titleLike,contentLike
 
 #### Cursor
-If Storage says there are more records than returned Server must add response fields **nextCursor** or **prevCursor** or both.  
+If Storage says there are more records than returned, Server must add response fields **nextCursor** or **prevCursor** or both.  
 They are full query string for next/prev page for request with same filters.
 
 Example

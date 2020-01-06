@@ -15,9 +15,10 @@ const yaml = require('js-yaml');
 const path = require('path');
 
 const toYAML = function (doc) {
+//    console.error(JSON.stringify(doc, null, '  '));
     return yaml.safeDump(doc, {
         lineWidth: 120,
-        noRefs: true
+        noRefs: true 
     });
 };
 
@@ -154,17 +155,16 @@ if (process.argv[1] == module.filename) {
 
     jybid.dereference(filepath, {inherit: true})
     .then((doc) => {
-        let res;
         switch (command) {
             case 'description': {
-                res = description(doc);
+                doc = description(doc);
                 break;
             }
         }
         if (command.match(/-yaml/) != null) {
-            console.log(toYAML(res));
+            console.log(toYAML(doc));
         } else {
-            console.log(toJSON(res));
+            console.log(toJSON(doc));
         }
     })
     .catch((e) => {

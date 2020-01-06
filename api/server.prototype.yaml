@@ -1,36 +1,59 @@
-inherits:
-  $ref: "./storage.yaml"
-  paths:
-    /nodes: true
-    /node/{id}: true
-    /access: true
-  operations: true
-  components: true
-  tags: true
-  x-method-constants: true
-openapi: "3.0.2"
-info:
-  title: Modular Notes Server
-  description: ""
-  termsOfService: ""
-  contact:
-    name: developer
-    url: example.com
-    email: support@example.com
-  license:
-    name: ""
-    url: ""
-  version: "1"
-servers:
-  - url: localhost:9002
-    description: local
-paths:
-  /nodes:
-    delete:
-      parameters:
-        - name: user
-          description: User performing request
-          in: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/queryInt'
+$inherit:
+  source:
+    $ref: ./storage.prototype.yaml
+  with:
+    - op: replace
+      path: /info
+      value:
+        title: Modular Notes Server
+        description: ""
+        termsOfService: ""
+        contact:
+          name: developer
+          url: example.com
+          email: support@example.com
+        license:
+          name: ""
+          url: ""
+        version: "1"
+    - op: replace
+      path: /servers
+      value:
+        - url: localhost:9002
+          description: local
+    - op: add
+      path: /components/parameters/Auth
+      value:
+        name: Auth
+        description: Authentication or authorization token
+        in: header
+        required: true
+        schema:
+          type: string
+          examples:
+            - Authorization: Basic <base64 encoded **user**:**password**>
+            - Cookie: token=<**Access-Token**>
+    - op: remove
+      path: /paths/~1nodes/get/parameters/[$ref=#/components/parameters/User]
+    - op: remove
+      path: /paths/~1node~1{id}/post/parameters/[name=user]
+    - op: remove
+      path: /paths/~1access/get/parameters/[$ref=#/components/parameters/User]
+    - op: remove
+      path: /paths/~1access/post/parameters/[$ref=#/components/parameters/User]
+    - op: add
+      path: /paths/~1nodes/get/parameters/-
+      value:
+        $ref: "#/components/parameters/Auth"
+    - op: add
+      path: /paths/~1node~1{id}/post/parameters/-
+      value:
+        $ref: "#/components/parameters/Auth"
+    - op: add
+      path: /paths/~1access/get/parameters/-
+      value:
+        $ref: "#/components/parameters/Auth"
+    - op: add
+      path: /paths/~1access/post/parameters/-
+      value:
+        $ref: "#/components/parameters/Auth"

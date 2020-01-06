@@ -38,21 +38,9 @@ paths:
                 enum:
                   - 'reason: not allowed'
         '500':
-          description: internal error
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - something bad happened
+          $ref: '#/components/responses/internal_error'
         '503':
-          description: temporarily unavailable
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - temporarily unavailable
+          $ref: '#/components/responses/temporarily_unavailable'
     get:
       summary: ''
       description: Returns list of found Nodes to which User has access
@@ -60,65 +48,37 @@ paths:
         - read
       operationId: getNodes
       parameters:
-        - name: user
-          description: User performing request
-          in: query
-          required: true
-          schema:
-            type: integer
-            example: 1
+        - $ref: "#/components/parameters/User"
         - name: idIn
           description: Node.id is one of
           in: query
           schema:
-            type: array
-            items:
-              type: integer
-            example:
-              - 2
-              - 3
+            $ref: '#/components/schemas/queryArrayInt'
         - name: idOut
           description: Node.id is none of
           in: query
           schema:
-            type: array
-            items:
-              type: integer
-            example:
-              - 2
-              - 3
+            $ref: '#/components/schemas/queryArrayInt'
         - name: idMin
           description: Node.id is greater or equal
           in: query
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: idMax
           description: Node.id is less
           in: query
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: classIn
           description: Node.class is one of
           in: query
           schema:
-            type: array
-            items:
-              type: string
-            example:
-              - word
-              - another_word
+            $ref: '#/components/schemas/queryArrayString'
         - name: classOut
           description: Node.class is none of
           in: query
           schema:
-            type: array
-            items:
-              type: string
-            example:
-              - word
-              - another_word
+            $ref: '#/components/schemas/queryArrayString'
         - name: titleLike
           description: 'Node.title matches filter with mechanism defined in prefix, for example for POSIX regex it is "regex:"'
           in: query
@@ -135,38 +95,17 @@ paths:
           description: 'Node.relations must contain relation described here as 4-items array "class,id,minValue,maxValue"'
           in: query
           schema:
-            type: array
-            items:
-              type: string
-            example:
-              - 'audio,4,0.5,1.7'
-              - 'image,,,'
-              - ',5,,'
-              - ',6,3.14,'
-              - ',7,,5.45'
+            $ref: '#/components/schemas/queryRelations'
         - name: relationsOut
           description: 'Node.relations must not contain relation described here as 4-items array "class,id,minValue,maxValue"'
           in: query
           schema:
-            type: array
-            items:
-              type: string
-            example:
-              - 'audio,4,0.5,1.7'
-              - 'image,,,'
-              - ',5,,'
-              - ',6,3.14,'
-              - ',7,,5.45'
+            $ref: '#/components/schemas/queryRelations'
         - name: responseFields
           description: Fields of Node in response. "id" is always included
           in: query
           schema:
-            type: array
-            items:
-              type: string
-            example:
-              - word
-              - another_word
+            $ref: '#/components/schemas/queryArrayString'
           example:
             - id
             - author
@@ -261,21 +200,9 @@ paths:
                   - 'sort: must be a string: "asc" or "desc"'
                   - 'limit: must be a positive integer'
         '500':
-          description: internal error
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - something bad happened
+          $ref: '#/components/responses/internal_error'
         '503':
-          description: temporarily unavailable
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - temporarily unavailable
+          $ref: '#/components/responses/temporarily_unavailable'
   '/node/{id}':
     post:
       summary: ''
@@ -290,16 +217,14 @@ paths:
           required: true
           allowEmptyValue: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: user
           description: 'User performing request, empty when creating User'
           in: query
           required: true
           allowEmptyValue: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: operation
           description: >-
             Integer whose bits mean ["delete", "title", "content", "flags", "meta", "relations"].  1 is "delete", 6 is
@@ -350,12 +275,7 @@ paths:
                     - 4
       responses:
         '200':
-          description: ''
-          content:
-            text/plain:
-              schema:
-                type: integer
-              example: 3
+          $ref: '#/components/responses/integer'
         '403':
           description: access denied
           content:
@@ -395,21 +315,9 @@ paths:
                   - 'relationsAdd: must be a string of array of 3-items (int,float,float) "id,localTitle,localValue"'
                   - 'relationsRm: must be a string of integers "id1,id2,.."'
         '500':
-          description: internal error
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - something bad happened
+          $ref: '#/components/responses/internal_error'
         '503':
-          description: temporarily unavailable
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - temporarily unavailable
+          $ref: '#/components/responses/temporarily_unavailable'
   /access:
     get:
       summary: ''
@@ -418,35 +326,22 @@ paths:
         - read
       operationId: getAccess
       parameters:
-        - name: user
-          description: User performing request
-          in: query
-          required: true
-          schema:
-            type: integer
-            example: 1
+        - $ref: "#/components/parameters/User"
         - name: idA
           description: Node A id
           in: query
           required: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: idB
           description: Node B id
           in: query
           required: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
       responses:
         '200':
-          description: ''
-          content:
-            text/plain:
-              schema:
-                type: integer
-              example: 3
+          $ref: '#/components/responses/integer'
         '403':
           description: access denied
           content:
@@ -476,21 +371,9 @@ paths:
                   - 'idA: must be a positive integer'
                   - 'idB: must be a positive integer'
         '500':
-          description: internal error
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - something bad happened
+          $ref: '#/components/responses/internal_error'
         '503':
-          description: temporarily unavailable
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - temporarily unavailable
+          $ref: '#/components/responses/temporarily_unavailable'
     post:
       summary: ''
       description: Edit access of Node A to Node B if User has access to both. Returns Node B id
@@ -498,27 +381,19 @@ paths:
         - write
       operationId: editAccess
       parameters:
-        - name: user
-          description: User performing request
-          in: query
-          required: true
-          schema:
-            type: integer
-            example: 1
+        - $ref: "#/components/parameters/User"
         - name: idA
           description: Node A id
           in: query
           required: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: idB
           description: Node B id
           in: query
           required: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
         - name: rights
           description: >-
             Integer whose bits mean ["read", "relate", "write", "delete", "create_access_to", "create_access_from"]. 1
@@ -526,17 +401,11 @@ paths:
           in: query
           required: true
           schema:
-            type: integer
-            example: 1
+            $ref: '#/components/schemas/queryInt'
           example: 32
       responses:
         '200':
-          description: ''
-          content:
-            text/plain:
-              schema:
-                type: integer
-              example: 3
+          $ref: '#/components/responses/integer'
         '403':
           description: access denied
           content:
@@ -567,21 +436,9 @@ paths:
                   - 'idB: must be a positive integer'
                   - 'rights: must be not negative integer'
         '500':
-          description: internal error
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - something bad happened
+          $ref: '#/components/responses/internal_error'
         '503':
-          description: temporarily unavailable
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - temporarily unavailable
+          $ref: '#/components/responses/temporarily_unavailable'
 components:
   parameters:
     User:
@@ -590,8 +447,7 @@ components:
       in: query
       required: true
       schema:
-        type: integer
-        example: 1
+        $ref: '#/components/schemas/queryInt' 
   schemas:
     queryInt:
       type: integer
